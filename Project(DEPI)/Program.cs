@@ -18,10 +18,9 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<BookifyHotelDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
-        b => b.MigrationsAssembly("Project(DEPI)") // ✅ أضف هذا
+        b => b.MigrationsAssembly("Project(DEPI)")
+              .EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null)
     ).UseLazyLoadingProxies());
-
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
@@ -83,6 +82,9 @@ app.MapControllerRoute(
 
 using (var scope = app.Services.CreateScope())
 {
+    var dbContext = scope.ServiceProvider.GetRequiredService<BookifyHotelDbContext>();
+    await dbContext.Database.MigrateAsync();
+
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     string[] roleNames = { "Admin", "User" };
 

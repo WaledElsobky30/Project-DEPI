@@ -21,7 +21,7 @@ namespace BookifyHotel.ModelConfiguration
                    .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(r => r.Room)
-                   .WithMany()
+                   .WithMany(r => r.ReservationCarts)
                    .HasForeignKey(r => r.RoomId) // ✅ تأكد أنه RoomId واحد
                    .OnDelete(DeleteBehavior.Cascade);
         }

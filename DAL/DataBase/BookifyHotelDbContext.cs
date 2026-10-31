@@ -34,7 +34,7 @@ namespace BookifyHotel.Data
         {
             base.OnModelCreating(modelBuilder); 
             modelBuilder.Entity<UserProfile>().Ignore("UserID");
-            //modelBuilder.ApplyConfiguration(new ReservationCartConfiguration());
+            modelBuilder.ApplyConfiguration(new ReservationCartConfiguration());
             modelBuilder.ApplyConfiguration(new PaymentConfiguration());
             modelBuilder.ApplyConfiguration(new BookingConfiguration());
             modelBuilder.ApplyConfiguration(new RoomTypeConfiguration());
@@ -93,19 +93,6 @@ namespace BookifyHotel.Data
                 .Property(r => r.PricePreview)
                 .HasPrecision(18, 2);
 
-
-            // ✅ بدلاً منه، عرف العلاقة يدوياً
-            modelBuilder.Entity<ReservationCart>()
-                .HasOne(rc => rc.Room)
-                .WithMany() // إذا كان Room ليس له ICollection<ReservationCart>
-                .HasForeignKey(rc => rc.RoomId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<ReservationCart>()
-                .HasOne(rc => rc.UserProfile)
-                .WithMany(up => up.ReservationCarts)
-                .HasForeignKey(rc => rc.UserProfileId)
-                .OnDelete(DeleteBehavior.Cascade);
 
         }
     }
