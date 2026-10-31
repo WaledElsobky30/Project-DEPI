@@ -1,276 +1,374 @@
-﻿@model BookifyHotel.Model.Room
+@model BookifyHotel.Model.Room
 
 @{
-    ViewData["Title"] = "Room Details";
+    ViewData["Title"] = $"{Model.RoomTypes?.Name ?? "Luxury Suite"} - Room {Model.RoomNumber}";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var roomTypeName = Model.RoomTypes?.Name ?? "Luxury Suite";
+    var roomDesc = Model.RoomTypes?.Description ?? "Designed with timeless elegance and modern comfort in mind, this suite offers panoramic views, bespoke Italian furnishings, and 24-hour personalized concierge service.";
+    var capacity = Model.RoomTypes?.Capacity ?? 2;
+    var price = Model.RoomTypes?.PricePerNight ?? 200m;
 }
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
 <style>
-   
     .details-page {
-        background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+        background: radial-gradient(circle at top left, rgba(212, 175, 55, 0.08), transparent 45%),
+                    linear-gradient(180deg, #07090e 0%, #0d111a 100%);
         min-height: 100vh;
-        padding: 120px 20px 60px;
-        color: white;
+        padding: 60px 24px 100px;
+        color: #f8fafc;
     }
 
-   
-    .glass-container {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 20px;
-        padding: 40px;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-        max-width: 1100px;
+    .details-container {
+        max-width: 1240px;
         margin: 0 auto;
     }
 
-    
-    .details-header {
+    .breadcrumb-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.85rem;
+        color: #94a3b8;
+        margin-bottom: 28px;
+    }
+
+    .breadcrumb-bar a {
+        color: #cbd5e1;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .breadcrumb-bar a:hover {
+        color: #d4af37;
+    }
+
+    .details-top-banner {
         display: flex;
         justify-content: space-between;
         align-items: flex-end;
-        margin-bottom: 30px;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-        padding-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 32px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .room-title h1 {
-        font-size: 2.5rem;
-        font-weight: 300;
-        margin: 0;
-        background: linear-gradient(45deg, #b8860b, #ffd700);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    .room-subtitle {
-        color: #ccc;
-        font-size: 1.1rem;
-        margin-top: 5px;
-    }
-
-    .room-price-badge {
-        text-align: right;
-    }
-
-    .price-value {
-        font-size: 2.5rem;
+    .suite-title-block h1 {
+        font-family: var(--font-display, 'Playfair Display', serif);
+        font-size: clamp(2rem, 3.8vw, 3rem);
         font-weight: 700;
-        color: #b8860b;
+        color: #f8fafc;
+        margin: 6px 0 10px;
     }
 
-    .price-unit {
-        font-size: 1rem;
-        color: #999;
+    .suite-meta-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
     }
 
-    
-    .details-grid {
+    .meta-pill {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #cbd5e1;
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-size: 0.82rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .meta-pill i {
+        color: #d4af37;
+    }
+
+    .details-layout {
         display: grid;
-        grid-template-columns: 1.2fr 0.8fr;
-        gap: 40px;
+        grid-template-columns: 1.55fr 1fr;
+        gap: 36px;
+        align-items: start;
     }
 
-    
-    .main-image {
+    .showcase-image-card {
+        position: relative;
+        border-radius: 24px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+        margin-bottom: 28px;
+    }
+
+    .showcase-image-card img {
         width: 100%;
-        height: 450px;
+        height: 460px;
         object-fit: cover;
-        border-radius: 15px;
-        border: 1px solid rgba(255,255,255,0.1);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        display: block;
     }
 
-   
-    .info-card {
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 15px;
-        padding: 25px;
-        margin-bottom: 20px;
+    .content-panel {
+        background: rgba(17, 22, 34, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 22px;
+        padding: 30px;
+        margin-bottom: 24px;
     }
 
-    .info-title {
-        color: #b8860b;
+    .panel-heading {
+        font-family: var(--font-display, 'Playfair Display', serif);
+        font-size: 1.35rem;
+        color: #f8fafc;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .panel-heading i {
+        color: #d4af37;
+        font-size: 1.05rem;
+    }
+
+    .description-copy {
+        color: #cbd5e1;
+        line-height: 1.8;
+        font-size: 0.98rem;
+        margin: 0;
+    }
+
+    .amenities-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+        gap: 14px;
+    }
+
+    .amenity-item {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 14px;
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #e2e8f0;
+        font-size: 0.9rem;
+    }
+
+    .amenity-item i {
+        color: #d4af37;
         font-size: 1.1rem;
-        font-weight: 600;
-        margin-bottom: 15px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        border-left: 3px solid #b8860b;
-        padding-left: 10px;
+        width: 22px;
+        text-align: center;
     }
 
-    .features-list {
+    /* Sticky Reservation Card */
+    .booking-sidebar-card {
+        position: sticky;
+        top: 105px;
+        background: rgba(17, 22, 34, 0.92);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        border-radius: 24px;
+        padding: 32px;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.55);
+    }
+
+    .price-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding-bottom: 20px;
+        margin-bottom: 22px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .price-amount {
+        font-family: var(--font-display, 'Playfair Display', serif);
+        font-size: 2.4rem;
+        font-weight: 700;
+        color: #d4af37;
+    }
+
+    .price-amount span {
+        font-family: var(--font-sans, sans-serif);
+        font-size: 0.9rem;
+        color: #94a3b8;
+        font-weight: 400;
+    }
+
+    .perks-list {
         list-style: none;
         padding: 0;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
+        margin: 0 0 26px;
     }
 
-        .features-list li {
-            color: #ddd;
-            display: flex;
-            align-items: center;
-            font-size: 0.95rem;
-        }
-
-        .features-list i {
-            color: #b8860b;
-            margin-right: 10px;
-            width: 20px;
-            text-align: center;
-        }
-
-    .description-text {
-        color: #ccc;
-        line-height: 1.7;
-        font-size: 1rem;
-    }
-
-   
-    .actions-bar {
-        margin-top: 40px;
+    .perks-list li {
         display: flex;
-        gap: 20px;
+        align-items: center;
+        gap: 10px;
+        color: #cbd5e1;
+        font-size: 0.9rem;
+        margin-bottom: 12px;
     }
 
-    .btn-book {
-        flex: 2;
-        background: linear-gradient(135deg, #b8860b, #d4af37);
-        color: white;
-        text-align: center;
-        padding: 15px;
-        border-radius: 10px;
+    .perks-list li i {
+        color: #10b981;
+    }
+
+    .btn-reserve-now {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background: linear-gradient(135deg, #d4af37 0%, #aa8010 100%);
+        color: #07090e;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 1.5px;
+        letter-spacing: 1.2px;
+        padding: 16px 24px;
+        border-radius: 14px;
         text-decoration: none;
-        transition: all 0.3s;
-        border: none;
-        box-shadow: 0 5px 15px rgba(184, 134, 11, 0.3);
+        transition: all 0.3s ease;
+        margin-bottom: 14px;
+        box-shadow: 0 12px 28px rgba(212, 175, 55, 0.3);
     }
 
-        .btn-book:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(184, 134, 11, 0.5);
-            color: white;
-        }
+    .btn-reserve-now:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 36px rgba(212, 175, 55, 0.45);
+        color: #07090e;
+    }
 
-    .btn-back {
-        flex: 1;
-        background: transparent;
-        border: 2px solid #b8860b;
-        color: #b8860b;
-        text-align: center;
-        padding: 15px;
-        border-radius: 10px;
+    .btn-return-catalog {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        color: #e2e8f0;
         font-weight: 600;
-        text-transform: uppercase;
+        padding: 13px 20px;
+        border-radius: 14px;
         text-decoration: none;
-        transition: all 0.3s;
+        transition: all 0.25s ease;
     }
 
-        .btn-back:hover {
-            background: rgba(184, 134, 11, 0.1);
-            color: white;
-            border-color: white;
-        }
+    .btn-return-catalog:hover {
+        border-color: #d4af37;
+        color: #d4af37;
+    }
 
-    
     @@media (max-width: 992px) {
-        .details-grid {
+        .details-layout {
             grid-template-columns: 1fr;
         }
-
-        .main-image {
-            height: 350px;
+        .booking-sidebar-card {
+            position: static;
+        }
+        .showcase-image-card img {
+            height: 320px;
         }
     }
 </style>
 
 <section class="details-page">
-    <div class="glass-container">
+    <div class="details-container">
 
-        <div class="details-header">
-            <div class="room-title">
-                <h1>@Model.RoomTypes.Name</h1>
-                <div class="room-subtitle">Room Number: @Model.RoomNumber | Floor: @Model.Floor</div>
-            </div>
-            <div class="room-price-badge">
-                <div class="price-value">$@Model.RoomTypes.PricePerNight.ToString("N0")</div>
-                <div class="price-unit">per night</div>
+        <nav class="breadcrumb-bar">
+            <a asp-controller="Home" asp-action="Index">Home</a>
+            <i class="fas fa-chevron-right" style="font-size: 0.7rem;"></i>
+            <a asp-controller="Room" asp-action="Index">Luxury Suites</a>
+            <i class="fas fa-chevron-right" style="font-size: 0.7rem;"></i>
+            <span style="color: #d4af37;">Suite @Model.RoomNumber</span>
+        </nav>
+
+        <div class="details-top-banner">
+            <div class="suite-title-block">
+                <span class="section-eyebrow"><i class="fas fa-crown"></i> Signature Collection</span>
+                <h1>@roomTypeName</h1>
+                <div class="suite-meta-pills">
+                    <span class="meta-pill"><i class="fas fa-door-open"></i> Suite #@Model.RoomNumber</span>
+                    <span class="meta-pill"><i class="fas fa-building"></i> Floor @Model.Floor</span>
+                    <span class="meta-pill"><i class="fas fa-user-friends"></i> Up to @capacity Guests</span>
+                    <span class="meta-pill"><i class="fas fa-star"></i> 4.9 / 5 Guest Rating</span>
+                </div>
             </div>
         </div>
 
-        <div class="details-grid">
-            <div class="image-wrapper">
-                <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "https://images.unsplash.com/photo-1611892440504-42a792e24d32" : Model.ImageUrl)"
-                     class="main-image" alt="Room Image">
+        <div class="details-layout">
+            <div>
+                <div class="showcase-image-card">
+                    <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=1200&q=85" : Model.ImageUrl)"
+                         alt="@roomTypeName" />
+                </div>
+
+                <div class="content-panel">
+                    <h3 class="panel-heading"><i class="fas fa-feather-pointed"></i> About This Sanctuary</h3>
+                    <p class="description-copy">@roomDesc</p>
+                </div>
+
+                <div class="content-panel">
+                    <h3 class="panel-heading"><i class="fas fa-sparkles"></i> Curated Suite Amenities</h3>
+                    <div class="amenities-grid">
+                        <div class="amenity-item"><i class="fas fa-wifi"></i> High-Speed Fiber Wi-Fi</div>
+                        <div class="amenity-item"><i class="fas fa-tv"></i> 65" 4K Smart OLED TV</div>
+                        <div class="amenity-item"><i class="fas fa-snowflake"></i> Smart Climate Control</div>
+                        <div class="amenity-item"><i class="fas fa-mug-hot"></i> Nespresso Bar & Tea</div>
+                        <div class="amenity-item"><i class="fas fa-bath"></i> Deep Soaking Marble Tub</div>
+                        <div class="amenity-item"><i class="fas fa-concierge-bell"></i> 24/7 Butler & Room Service</div>
+                        <div class="amenity-item"><i class="fas fa-vault"></i> In-Room Laptop Safe</div>
+                        <div class="amenity-item"><i class="fas fa-spa"></i> Luxury Organic Toiletries</div>
+                    </div>
+                </div>
             </div>
 
-            <div class="info-wrapper">
-
-                <div class="info-card">
-                    <div class="info-title">Description</div>
-                    <p class="description-text">
-                        Experience ultimate luxury in our @Model.RoomTypes.Name. Designed with elegance and comfort in mind,
-                        this room offers stunning views and premium amenities to ensure your stay is unforgettable.
-                    </p>
-                </div>
-
-                <div class="info-card">
-                    <div class="info-title">Room Amenities</div>
-                    <ul class="features-list">
-                        <li><i class="fas fa-wifi"></i> High-Speed WiFi</li>
-                        <li><i class="fas fa-tv"></i> Smart TV</li>
-                        <li><i class="fas fa-snowflake"></i> Air Conditioning</li>
-                        <li><i class="fas fa-coffee"></i> Coffee Maker</li>
-                        <li><i class="fas fa-concierge-bell"></i> 24/7 Service</li>
-                        <li><i class="fas fa-hot-tub"></i> Private Bath</li>
-                    </ul>
-                </div>
-
-                <div class="info-card">
-                    <div class="info-title">Current Status</div>
-                    @if (Model.IsAvailable)
+            <!-- Sticky Reservation Box -->
+            <aside class="booking-sidebar-card">
+                <div class="price-header">
+                    <div class="price-amount">
+                        $@price.ToString("N0") <span>/ night</span>
+                    </div>
+                    @if (Model.IsAvailable && (Model.Status == "Available" || string.IsNullOrEmpty(Model.Status)))
                     {
-                        <span style="color: #10b981; font-weight: bold; font-size: 1.1rem;">
-                            <i class="fas fa-check-circle"></i> Available Now
+                        <span style="background: rgba(16,185,129,0.18); color: #34d399; border: 1px solid rgba(16,185,129,0.35); padding: 6px 13px; border-radius: 50px; font-size: 0.78rem; font-weight: 700;">
+                            <i class="fas fa-check-circle me-1"></i> Available
                         </span>
                     }
                     else
                     {
-                        <span style="color: #ef4444; font-weight: bold; font-size: 1.1rem;">
-                            <i class="fas fa-times-circle"></i> Currently Booked
+                        <span style="background: rgba(239,68,68,0.18); color: #f87171; border: 1px solid rgba(239,68,68,0.35); padding: 6px 13px; border-radius: 50px; font-size: 0.78rem; font-weight: 700;">
+                            <i class="fas fa-clock me-1"></i> @Model.Status
                         </span>
                     }
                 </div>
 
-            </div>
-        </div>
+                <ul class="perks-list">
+                    <li><i class="fas fa-check-circle"></i> Instant booking confirmation</li>
+                    <li><i class="fas fa-check-circle"></i> Free cancellation up to 24h before arrival</li>
+                    <li><i class="fas fa-check-circle"></i> Complimentary welcome refreshments</li>
+                    <li><i class="fas fa-check-circle"></i> Access to infinity pool & thermal spa</li>
+                </ul>
 
-        <div class="actions-bar">
-            <a href="@Url.Action("Index", "Room")" class="btn-back">
-                <i class="fas fa-arrow-left"></i> Back to Rooms
-            </a>
+                @if (Model.IsAvailable && (Model.Status == "Available" || string.IsNullOrEmpty(Model.Status)))
+                {
+                    <a asp-controller="Booking" asp-action="Checkout" asp-route-roomId="@Model.RoomId" class="btn-reserve-now">
+                        <i class="fas fa-calendar-check"></i> Proceed to Reservation
+                    </a>
+                }
+                else
+                {
+                    <button class="btn-reserve-now" style="background: rgba(255,255,255,0.08); color: #64748b; box-shadow: none; cursor: not-allowed;" disabled>
+                        <i class="fas fa-lock"></i> Currently Unavailable
+                    </button>
+                }
 
-            @if (Model.IsAvailable)
-            {
-                <a asp-controller="Booking" asp-action="Checkout" asp-route-roomId="@Model.RoomId" class="btn-book">
-                    Book This Room Now <i class="fas fa-check"></i>
+                <a asp-controller="Room" asp-action="Index" class="btn-return-catalog">
+                    <i class="fas fa-arrow-left"></i> Back to All Suites
                 </a>
-            }
-            else
-            {
-                <button class="btn-book" style="background: #555; cursor: not-allowed; box-shadow: none;" disabled>
-                    Not Available <i class="fas fa-lock"></i>
-                </button>
-            }
+            </aside>
         </div>
 
     </div>

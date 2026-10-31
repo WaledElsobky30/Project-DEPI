@@ -1,50 +1,42 @@
-﻿using BookifyHotel.Data;
+using BookifyHotel.Data;
 using BookifyHotel.Model;
 using DAL.DataBase;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PLL.Services
 {
     public class RoomService : BaseService<Room>
     {
-        public BookifyHotelDbContext _context ;
-        public RoomService(IGenericRepository<Room> repo ,BookifyHotelDbContext context ) : base(repo)
+        private readonly BookifyHotelDbContext _context;
+
+        public RoomService(IGenericRepository<Room> repo, BookifyHotelDbContext context) : base(repo)
         {
             _context = context;
         }
 
-        //public IEnumerable<Room> GetAvailableRooms()
-        //{
-        //    return _repo.GetAll()
-        //                .Where(r => r.Status == "Available")
-        //                .ToList();
-        //}
-
-
         // جلب غرفة برقمها
         public Room? GetRoomByNumber(int roomNumber)
         {
-            return _repo.GetAll()
-                .FirstOrDefault(r => r.RoomNumber == roomNumber);
+            return _repo.FirstOrDefault(r => r.RoomNumber == roomNumber);
         }
 
         // جلب الغرف المتاحة
         public IEnumerable<Room> GetAvailableRooms()
         {
-            return _repo.GetAll()
-                .Where(r => r.IsAvailable && r.Status == "Available")
+            return _repo.Query()
+                .Include(r => r.RoomTypes)
+                .Where(r => r.IsAvailable && r.Status != "Maintenance")
                 .ToList();
         }
 
         // جلب الغرف بنوع معين
         public IEnumerable<Room> GetRoomsByType(int roomTypeId)
         {
-            return _repo.GetAll()
+            return _repo.Query()
+                .Include(r => r.RoomTypes)
                 .Where(r => r.RoomTypeId == roomTypeId && r.IsAvailable)
                 .ToList();
         }
@@ -52,13 +44,11 @@ namespace PLL.Services
         // جلب الغرف في طابق معين
         public IEnumerable<Room> GetRoomsByFloor(int floor)
         {
-            return _repo.GetAll()
-                .Where(r => r.Floor == floor)
-                .ToList();
+            return _repo.Find(r => r.Floor == floor);
         }
 
         // جلب غرفة مع تفاصيل نوعها
-        public Room ?GetRoomWithType(int roomId)
+        public Room? GetRoomWithType(int roomId)
         {
             return _context.Rooms
                 .Include(r => r.RoomTypes)
@@ -79,30 +69,18 @@ namespace PLL.Services
             return true;
         }
 
-        // البحث عن غرف متاحة في تاريخ معين
+        // البحث عن غرف متاحة في تاريخ معين (باستعلام SQL مباشر)
         public IEnumerable<Room> GetAvailableRoomsForDates(DateTime checkIn, DateTime checkOut)
         {
-            // نحتاج للتحقق من الحجوزات
-            var bookedRoomIds = _context.Bookings
-                .Where(b => b.Status != "Cancelled" &&
-                           ((checkIn >= b.CheckInDate && checkIn < b.CheckOutDate) ||
-                            (checkOut > b.CheckInDate && checkOut <= b.CheckOutDate) ||
-                            (checkIn <= b.CheckInDate && checkOut >= b.CheckOutDate)))
-                .Select(b => b.RoomId)
-                .ToList();
-
-            return _repo.GetAll()
-                .Where(r => !bookedRoomIds.Contains(r.RoomId) && r.IsAvailable)
+            return _repo.Query()
+                .Include(r => r.RoomTypes)
+                .Where(r => r.IsAvailable &&
+                            !_context.Bookings.Any(b =>
+                                b.RoomId == r.RoomId &&
+                                b.Status != "Cancelled" &&
+                                checkIn < b.CheckOutDate &&
+                                checkOut > b.CheckInDate))
                 .ToList();
         }
-
-
-
-
-
-
-
-
     }
-
 }

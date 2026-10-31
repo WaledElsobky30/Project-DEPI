@@ -1,75 +1,86 @@
-﻿using BookifyHotel.Data;
+using BookifyHotel.Data;
 using BookifyHotel.Model;
 using DAL.DataBase;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace PLL.Services
 {
     public class BookingService : BaseService<Booking>
     {
-        public BookifyHotelDbContext _context ;
-        public BookingService(IGenericRepository<Booking> repo, BookifyHotelDbContext context) : base(repo) 
+        private readonly BookifyHotelDbContext _context;
+
+        public BookingService(IGenericRepository<Booking> repo, BookifyHotelDbContext context) : base(repo)
         {
             _context = context;
-
         }
-
 
         public int GetUserBookingsCount(int userId)
         {
-            return _repo.GetAll()
-                .Count(b => b.UserProfileId == userId);
+            return _repo.Count(b => b.UserProfileId == userId);
         }
-
 
         public int GetActiveUserBookingsCount(int userId)
         {
-            return _repo.GetAll()
-                .Count(b => b.UserProfileId == userId &&
+            return _repo.Count(b => b.UserProfileId == userId &&
                            (b.Status == "Confirmed" || b.Status == "Completed"));
         }
-
-
-
-
-
-
-
-
-        // نضيف هذه الدوال:
 
         // جلب جميع حجوزات مستخدم معين
         public IEnumerable<Booking> GetBookingsByUserId(int userId)
         {
-            return _repo.GetAll()
+            return _repo.Query()
                 .Where(b => b.UserProfileId == userId)
                 .OrderByDescending(b => b.CheckInDate)
                 .ToList();
         }
 
-        // إنشاء حجز جديد
-        public async Task<Booking>? CreateBookingAsync(int userId, int roomId, DateTime checkIn, DateTime checkOut, int guests)
+        public async Task<List<Booking>> GetAllWithDetailsAsync()
         {
-            // حساب السعر (هنا نستدعي RoomService للحصول على السعر)
-            // لكن أولاً ننشئ الحجز
+            return await _repo.Query()
+                .Include(b => b.UserProfile)
+                .Include(b => b.Room)
+                    .ThenInclude(r => r.RoomTypes)
+                .OrderByDescending(b => b.BookingDate)
+                .ToListAsync();
+        }
+
+        public async Task<Booking?> GetByIdWithDetailsAsync(int bookingId)
+        {
+            return await _repo.Query()
+                .Include(b => b.UserProfile)
+                .Include(b => b.Payments)
+                .Include(b => b.Room)
+                    .ThenInclude(r => r.RoomTypes)
+                .FirstOrDefaultAsync(b => b.BookingId == bookingId);
+        }
+
+        // إنشاء حجز جديد
+        public async Task<Booking> CreateBookingAsync(int userId, int roomId, DateTime checkIn, DateTime checkOut, int guests)
+        {
+            var room = await _context.Rooms
+                .Include(r => r.RoomTypes)
+                .FirstOrDefaultAsync(r => r.RoomId == roomId);
+
+            int nights = Math.Max((int)Math.Ceiling((checkOut - checkIn).TotalDays), 1);
+            decimal totalPrice = (room?.RoomTypes?.PricePerNight ?? 0) * nights;
+
             var booking = new Booking
             {
                 UserProfileId = userId,
                 RoomId = roomId,
                 CheckInDate = checkIn,
                 CheckOutDate = checkOut,
-                TotalPrice = 0, // سيتم حسابه لاحقاً
-                Status = "Pending", // أو "Confirmed"
+                TotalPrice = totalPrice,
+                Status = "Pending",
                 BookingDate = DateTime.Now
             };
 
             _repo.Add(booking);
-            _repo.Save();
+            await _repo.SaveAsync();
             return booking;
         }
 
@@ -86,34 +97,31 @@ namespace PLL.Services
         }
 
         // جلب حجز مع بيانات الغرفة (بتضمين العلاقات)
-        public Booking ?GetBookingWithRoom(int bookingId)
+        public Booking? GetBookingWithRoom(int bookingId)
         {
-            // نستخدم DbContext للـ Include
             return _context.Bookings
                 .Include(b => b.Room)
+                    .ThenInclude(r => r.RoomTypes)
                 .FirstOrDefault(b => b.BookingId == bookingId);
         }
 
-        // التحقق من تواريخ الحجز
-        public bool IsRoomAvailableForDates(int roomId, DateTime checkIn, DateTime checkOut)
+        // التحقق من تواريخ الحجز (باستعلام SQL مباشر بدلاً من تحميل الجدول بالكامل في الذاكرة)
+        public bool IsRoomAvailableForDates(int roomId, DateTime checkIn, DateTime checkOut, int? excludeBookingId = null)
         {
-            return !_repo.GetAll()
-                .Any(b => b.RoomId == roomId &&
-                         b.Status != "Cancelled" &&
-                         ((checkIn >= b.CheckInDate && checkIn < b.CheckOutDate) ||
-                          (checkOut > b.CheckInDate && checkOut <= b.CheckOutDate) ||
-                          (checkIn <= b.CheckInDate && checkOut >= b.CheckOutDate)));
+            return !_repo.Any(b => b.RoomId == roomId &&
+                                   (excludeBookingId == null || b.BookingId != excludeBookingId.Value) &&
+                                   b.Status != "Cancelled" &&
+                                   checkIn < b.CheckOutDate &&
+                                   checkOut > b.CheckInDate);
         }
 
-
-
-
-
-
-
-
-
-
+        public async Task<bool> IsRoomAvailableForDatesAsync(int roomId, DateTime checkIn, DateTime checkOut, int? excludeBookingId = null)
+        {
+            return !await _repo.AnyAsync(b => b.RoomId == roomId &&
+                                              (excludeBookingId == null || b.BookingId != excludeBookingId.Value) &&
+                                              b.Status != "Cancelled" &&
+                                              checkIn < b.CheckOutDate &&
+                                              checkOut > b.CheckInDate);
+        }
     }
-
 }

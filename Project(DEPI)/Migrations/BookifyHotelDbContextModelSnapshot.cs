@@ -289,8 +289,8 @@ namespace Project_DEPI_.Migrations
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("nvarchar(15)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("ProfilePhoto")
                         .IsRequired()
@@ -465,17 +465,12 @@ namespace Project_DEPI_.Migrations
                     b.Property<int>("RoomId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("RoomId1")
-                        .HasColumnType("int");
-
                     b.Property<int>("UserProfileId")
                         .HasColumnType("int");
 
                     b.HasKey("ReservationCartId");
 
                     b.HasIndex("RoomId");
-
-                    b.HasIndex("RoomId1");
 
                     b.HasIndex("UserProfileId");
 
@@ -622,14 +617,10 @@ namespace Project_DEPI_.Migrations
             modelBuilder.Entity("ReservationCart", b =>
                 {
                     b.HasOne("BookifyHotel.Model.Room", "Room")
-                        .WithMany()
+                        .WithMany("ReservationCarts")
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("BookifyHotel.Model.Room", null)
-                        .WithMany("ReservationCarts")
-                        .HasForeignKey("RoomId1");
 
                     b.HasOne("BookifyHotel.Model.UserProfile", "UserProfile")
                         .WithMany("ReservationCarts")

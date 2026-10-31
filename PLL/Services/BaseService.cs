@@ -1,4 +1,4 @@
-﻿using DAL.DataBase;
+using DAL.DataBase;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,9 +26,19 @@ namespace PLL.Services
             return _repo.GetAll();
         }
 
-        public T GetById(int id)
+        public Task<List<T>> GetAllAsync()
+        {
+            return _repo.GetAllAsync();
+        }
+
+        public T? GetById(int id)
         {
             return _repo.GetById(id);
+        }
+
+        public Task<T?> GetByIdAsync(int id)
+        {
+            return _repo.GetByIdAsync(id);
         }
 
         public void Create(T entity)
@@ -37,10 +47,22 @@ namespace PLL.Services
             _repo.Save();
         }
 
+        public async Task CreateAsync(T entity)
+        {
+            _repo.Add(entity);
+            await _repo.SaveAsync();
+        }
+
         public void Update(T entity)
         {
             _repo.Update(entity);
             _repo.Save();
+        }
+
+        public async Task UpdateAsync(T entity)
+        {
+            _repo.Update(entity);
+            await _repo.SaveAsync();
         }
 
         public void Delete(int id)
@@ -48,6 +70,11 @@ namespace PLL.Services
             _repo.Delete(id);
             _repo.Save();
         }
-    }
 
+        public async Task DeleteAsync(int id)
+        {
+            _repo.Delete(id);
+            await _repo.SaveAsync();
+        }
+    }
 }

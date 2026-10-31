@@ -21,7 +21,7 @@ namespace BookifyHotel.Model
         public string? FullName { get; set; }
 
         [Required]
-        [MaxLength(15)]
+        [MaxLength(50)]
         public string? PhoneNumber { get; set; }
 
         [Required]

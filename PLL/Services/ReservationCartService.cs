@@ -1,11 +1,5 @@
-﻿using BookifyHotel.Model;
+using BookifyHotel.Model;
 using DAL.DataBase;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PLL.Services
 {
@@ -15,11 +9,7 @@ namespace PLL.Services
 
         public int GetUserReservationsCount(int userId)
         {
-            return _repo.GetAll()
-                .Count(rc => rc.UserProfileId == userId);
+            return _repo.Count(rc => rc.UserProfileId == userId);
         }
-
-
     }
-
 }

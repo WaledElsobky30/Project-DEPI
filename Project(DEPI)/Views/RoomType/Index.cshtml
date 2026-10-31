@@ -1,4 +1,4 @@
-﻿@model IEnumerable<BookifyHotel.Model.RoomType>
+@model IEnumerable<BookifyHotel.Model.RoomType>
 
 @{
     ViewData["Title"] = "Room Types Management";
@@ -319,7 +319,7 @@
     function confirmDelete(id, name) {
         if (confirm(`Are you sure you want to delete "${name}"? This will delete all rooms associated with this type!`)) {
             // 👇 رابط الحذف الصحيح
-            window.location.href = '@Url.Action("Delete", "RoomType")' + '?id=' + id;
+            submitAdminPost('@Url.Action("Delete", "RoomType")', { id: id });
         }
         return false;
     }

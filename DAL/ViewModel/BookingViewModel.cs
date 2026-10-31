@@ -1,7 +1,7 @@
-﻿
+using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Project_DEPI_.Controllers
+namespace DAL.ViewModel
 {
     public class BookingViewModel
     {
@@ -30,9 +30,9 @@ namespace Project_DEPI_.Controllers
 
         public DateTime MinCheckInDate { get; set; }
         public DateTime MaxCheckOutDate { get; set; }
-        public string? FullName { get; internal set; }
-        public int BookingId { get; internal set; }
-        public string Status { get; internal set; }
-        public decimal TotalPrice { get; internal set; }
+        public string? FullName { get; set; }
+        public int BookingId { get; set; }
+        public string Status { get; set; } = string.Empty;
+        public decimal TotalPrice { get; set; }
     }
 }

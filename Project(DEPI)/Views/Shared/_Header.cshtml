@@ -1,4 +1,4 @@
-﻿@* Views/Shared/_Header.cshtml *@
+@* Views/Shared/_Header.cshtml *@
 @using Microsoft.AspNetCore.Identity
 @using BookifyHotel.Model
 @using BookifyHotel.Data
@@ -7,314 +7,322 @@
 @inject UserManager<AppUser> UserManager
 @inject BookifyHotelDbContext _context
 
-<style>
-    /* CSS يبقى كما هو تماماً */
-    .luxury-header * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+}
 
+<style>
     .luxury-header {
-        background-color: #fff;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        background: rgba(8, 11, 17, 0.88);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(212, 175, 55, 0.18);
         position: sticky;
         top: 0;
         z-index: 1000;
+        transition: all 0.3s ease;
     }
 
+    .luxury-header .top-bar {
+        background: linear-gradient(90deg, #05070b 0%, #0d131f 50%, #05070b 100%);
+        color: #94a3b8;
+        padding: 7px 0;
+        font-size: 0.8rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .luxury-header .top-bar-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    .luxury-header .top-bar-left {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+    .luxury-header .top-bar-text {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        letter-spacing: 0.5px;
+    }
+
+    .luxury-header .top-bar-text i {
+        color: #d4af37;
+    }
+
+    .luxury-header .top-bar-links {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+    }
+
+    .luxury-header .top-bar-links a {
+        color: #cbd5e1;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        transition: color 0.25s;
+    }
+
+    .luxury-header .top-bar-links a i {
+        color: #d4af37;
+    }
+
+    .luxury-header .top-bar-links a:hover {
+        color: #d4af37;
+    }
+
+    .luxury-header .main-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 16px 24px;
+    }
+
+    .luxury-header .logo {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #f8fafc;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        letter-spacing: 0.5px;
+    }
+
+    .luxury-header .logo-badge {
+        width: 40px;
+        height: 40px;
+        border-radius: 11px;
+        background: linear-gradient(135deg, #b8860b, #d4af37);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #090d16;
+        font-size: 1.1rem;
+        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+    }
+
+    .luxury-header .logo span.gold {
+        color: #d4af37;
+    }
+
+    .luxury-header nav ul {
+        display: flex;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        gap: 8px;
+    }
+
+    .luxury-header nav ul li a {
+        text-decoration: none;
+        color: #cbd5e1;
+        font-weight: 500;
+        font-size: 0.94rem;
+        padding: 9px 16px;
+        border-radius: 10px;
+        transition: all 0.25s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .luxury-header nav ul li a i {
+        font-size: 0.88rem;
+        color: #d4af37;
+        opacity: 0.85;
+    }
+
+    .luxury-header nav ul li a:hover,
+    .luxury-header nav ul li a.active {
+        color: #ffffff;
+        background: rgba(212, 175, 55, 0.12);
+    }
+
+    .luxury-header .user-section {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .luxury-header .welcome-message {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+    }
+
+    .luxury-header .welcome-message .user-name {
+        font-weight: 600;
+        color: #f8fafc;
+        font-size: 0.9rem;
+    }
+
+    .luxury-header .welcome-message .user-role {
+        font-size: 0.76rem;
+        color: #d4af37;
+    }
+
+    .luxury-header .profile-dropdown {
+        position: relative;
+    }
+
+    .luxury-header .profile-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(212, 175, 55, 0.25);
+        cursor: pointer;
+        padding: 6px 12px 6px 6px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-radius: 999px;
+        transition: all 0.25s;
+    }
+
+    .luxury-header .profile-btn:hover {
+        background: rgba(212, 175, 55, 0.12);
+        border-color: #d4af37;
+    }
+
+    .luxury-header .profile-avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #b8860b, #d4af37);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #090d16;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    .luxury-header .dropdown-menu {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        background: #111827;
+        border: 1px solid rgba(212, 175, 55, 0.25);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+        border-radius: 14px;
+        min-width: 215px;
+        padding: 8px;
+        display: none;
+        z-index: 1001;
+    }
+
+    .luxury-header .profile-dropdown:hover .dropdown-menu {
+        display: block;
+    }
+
+    .luxury-header .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        border-radius: 9px;
+        text-decoration: none;
+        color: #e2e8f0;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+
+    .luxury-header .dropdown-item:hover {
+        background: rgba(212, 175, 55, 0.14);
+        color: #ffffff;
+    }
+
+    .luxury-header .dropdown-item i {
+        width: 18px;
+        text-align: center;
+        color: #d4af37;
+    }
+
+    .luxury-header .dropdown-divider {
+        height: 1px;
+        background-color: rgba(255, 255, 255, 0.08);
+        margin: 6px 0;
+    }
+
+    .luxury-header .logout-btn {
+        color: #f87171;
+    }
+
+    .luxury-header .logout-btn i {
+        color: #f87171;
+    }
+
+    .luxury-header .logout-btn:hover {
+        background: rgba(239, 68, 68, 0.15);
+        color: #fca5a5;
+    }
+
+    .luxury-header .auth-buttons {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .luxury-header .auth-buttons a {
+        text-decoration: none;
+        padding: 9px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.88rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.25s ease;
+    }
+
+    .luxury-header .login-btn {
+        color: #f8fafc;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    .luxury-header .login-btn:hover {
+        border-color: #d4af37;
+        color: #d4af37;
+    }
+
+    .luxury-header .register-btn {
+        background: linear-gradient(135deg, #b8860b, #d4af37);
+        color: #090d16;
+        box-shadow: 0 4px 15px rgba(184, 134, 11, 0.3);
+    }
+
+    .luxury-header .register-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
+    }
+
+    @@media (max-width: 992px) {
         .luxury-header .top-bar {
-            background-color: #1a1a1a;
-            color: #fff;
-            padding: 8px 0;
-            font-size: 14px;
-        }
-
-        .luxury-header .top-bar-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        .luxury-header .top-bar-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .luxury-header .top-bar-text {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-            .luxury-header .top-bar-text i {
-                color: #b8860b;
-                font-size: 12px;
-            }
-
-        .luxury-header .top-bar-links {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-            .luxury-header .top-bar-links a {
-                color: #fff;
-                text-decoration: none;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                font-size: 13px;
-                transition: color 0.3s;
-            }
-
-                .luxury-header .top-bar-links a:hover {
-                    color: #b8860b;
-                }
-
-        .luxury-header .main-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 15px 20px;
-        }
-
-        .luxury-header .logo {
-            font-size: 28px;
-            font-weight: bold;
-            color: #b8860b;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-            .luxury-header .logo span {
-                color: #1a1a1a;
-            }
-
-            .luxury-header .logo i {
-                font-size: 22px;
-            }
-
-        .luxury-header nav ul {
-            display: flex;
-            list-style: none;
-        }
-
-            .luxury-header nav ul li {
-                margin-left: 25px;
-            }
-
-                .luxury-header nav ul li a {
-                    text-decoration: none;
-                    color: #333;
-                    font-weight: 500;
-                    font-size: 15px;
-                    transition: color 0.3s;
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                }
-
-                    .luxury-header nav ul li a:hover {
-                        color: #b8860b;
-                    }
-
-                    .luxury-header nav ul li a i {
-                        font-size: 14px;
-                    }
-
-        .luxury-header .user-section {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .luxury-header .welcome-message {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-        }
-
-            .luxury-header .welcome-message .user-name {
-                font-weight: 600;
-                color: #333;
-                font-size: 14px;
-                white-space: nowrap;
-            }
-
-            .luxury-header .welcome-message .user-role {
-                font-size: 12px;
-                color: #b8860b;
-                font-weight: 500;
-            }
-
-        .luxury-header .profile-dropdown {
-            position: relative;
-        }
-
-        .luxury-header .profile-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-radius: 6px;
-            transition: background-color 0.3s;
-        }
-
-            .luxury-header .profile-btn:hover {
-                background-color: #f5f5f5;
-            }
-
-        .luxury-header .profile-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #b8860b, #d4af37);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .luxury-header .dropdown-menu {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            min-width: 180px;
-            padding: 8px 0;
             display: none;
-            z-index: 1001;
         }
-
-        .luxury-header .profile-dropdown:hover .dropdown-menu {
-            display: block;
-        }
-
-        .luxury-header .dropdown-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 15px;
-            text-decoration: none;
-            color: #333;
-            font-size: 14px;
-            transition: background-color 0.3s;
-        }
-
-            .luxury-header .dropdown-item:hover {
-                background-color: #f9f9f9;
-            }
-
-            .luxury-header .dropdown-item i {
-                width: 16px;
-                text-align: center;
-                color: #b8860b;
-            }
-
-        .luxury-header .dropdown-divider {
-            height: 1px;
-            background-color: #eee;
-            margin: 5px 0;
-        }
-
-        .luxury-header .logout-btn {
-            color: #dc3545;
-        }
-
-            .luxury-header .logout-btn:hover {
-                background-color: #fef2f2;
-            }
-
-        .luxury-header .auth-buttons a {
-            text-decoration: none;
-            margin-left: 15px;
-            padding: 8px 15px;
-            border-radius: 4px;
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        .luxury-header .login-btn {
-            color: #333;
-            border: 1px solid #ddd;
-        }
-
-        .luxury-header .register-btn {
-            background-color: #b8860b;
-            color: white;
-        }
-
-    @@media (max-width: 768px) {
         .luxury-header .main-header {
-            flex-direction: column;
-            padding: 10px 20px;
-        }
-
-        .luxury-header nav ul {
-            margin: 15px 0;
             flex-wrap: wrap;
-            justify-content: center;
+            gap: 12px;
         }
-
-            .luxury-header nav ul li {
-                margin: 5px 10px;
-            }
-
-        .luxury-header .user-section {
-            margin-top: 10px;
-            flex-direction: column;
-            gap: 10px;
+        .luxury-header nav {
+            order: 3;
+            width: 100%;
         }
-
-        .luxury-header .welcome-message {
-            align-items: center;
-        }
-
-        .luxury-header .top-bar-content {
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .luxury-header .top-bar-left {
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .luxury-header .top-bar-links {
+        .luxury-header nav ul {
             justify-content: center;
             flex-wrap: wrap;
-            gap: 15px;
-        }
-    }
-
-    @@media (max-width: 480px) {
-        .luxury-header nav ul li a span {
-            display: none;
-        }
-
-        .luxury-header nav ul li a i {
-            font-size: 16px;
-        }
-
-        .luxury-header .logo span {
-            display: none;
         }
     }
 </style>
@@ -324,141 +332,122 @@
         <div class="top-bar-content">
             <div class="top-bar-left">
                 <div class="top-bar-text">
-                    <i class="fas fa-star"></i>
-                    <span>Welcome to BookifyHotel</span>
+                    <i class="fas fa-crown"></i>
+                    <span>5-Star Bespoke Hospitality &amp; Suites</span>
                 </div>
             </div>
             <div class="top-bar-links">
                 <a href="tel:+15551234567">
-                    <i class="fas fa-phone"></i>
+                    <i class="fas fa-phone-alt"></i>
                     <span>+1 (555) 123-4567</span>
                 </a>
-                <a href="mailto:info@bookifyhotel.com">
+                <a href="mailto:concierge@bookifyhotel.com">
                     <i class="fas fa-envelope"></i>
-                    <span>info@bookifyhotel.com</span>
+                    <span>concierge@bookifyhotel.com</span>
                 </a>
             </div>
         </div>
     </div>
 
     <div class="main-header">
-        <!-- Logo -->
-        <a href="/" class="logo">
-            <i class="fas fa-hotel"></i>
-            <span>Bookify<span>Hotel</span></span>
+        <a href="/Home/Index" class="logo">
+            <span class="logo-badge"><i class="fas fa-hotel"></i></span>
+            <span>Bookify<span class="gold">Hotel</span></span>
         </a>
 
-        <!-- Navigation -->
         <nav>
             <ul>
                 <li>
-                    <a href="/Home/Index">
-                        <i class="fas fa-home"></i>
+                    <a href="/Home/Index" class="@(currentController == "Home" ? "active" : "")">
+                        <i class="fas fa-compass"></i>
                         <span>Home</span>
                     </a>
                 </li>
-
                 <li>
-                    <a href="/About/Index">
-                        <i class="fas fa-info-circle"></i>
+                    <a href="/Room/Index" class="@(currentController == "Room" ? "active" : "")">
+                        <i class="fas fa-bed"></i>
+                        <span>Rooms &amp; Suites</span>
+                    </a>
+                </li>
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    <li>
+                        <a href="/Booking/MyBookings" class="@(currentController == "Booking" ? "active" : "")">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>My Stays</span>
+                        </a>
+                    </li>
+                }
+                <li>
+                    <a href="/About/Index" class="@(currentController == "About" ? "active" : "")">
+                        <i class="fas fa-gem"></i>
                         <span>About</span>
-                    </a>
-                </li>
-             
-                <li>
-                    <a href="/Room/Index">
-                        <i class="fas fa-door-open"></i>
-                        <span>Rooms</span>
-                    </a>
-                </li>
-               
-                
-                <li>
-                    <a href="/Contact">
-                        <i class="fas fa-envelope"></i>
-                        <span>Contact</span>
                     </a>
                 </li>
             </ul>
         </nav>
 
-        <!-- User Section -->
         <div class="user-section">
             @if (SignInManager.IsSignedIn(User))
             {
                 @try
                 {
                     var user = await UserManager.GetUserAsync(User);
-
                     @if (user != null)
                     {
-                        string? firstName = "User";
-                        string firstLetter = "U";
-                        string phoneNumber = "N/A";
+                        string firstName = user.UserName?.Split('@')[0] ?? "Guest";
+                        string firstLetter = firstName.Substring(0, 1).ToUpper();
+                        string roleLabel = User.IsInRole("Admin") ? "Administrator" : "Member";
 
-                        // Get user data from Identity
-                        firstName = user.UserName?.Split('@')[0] ?? "User";
-                        firstLetter = firstName.Substring(0, 1).ToUpper();
-                        phoneNumber = user.PhoneNumber ?? "Not set";
-
-                        @* Try to get data from UserProfiles if available *@
                         @if (_context != null)
                         {
                             try
                             {
                                 var userProfile = await _context.UserProfiles
-                                .FirstOrDefaultAsync(up => up.UserId == user.Id);
+                                    .FirstOrDefaultAsync(up => up.UserId == user.Id);
 
-                                if (userProfile != null)
+                                if (userProfile != null && !string.IsNullOrEmpty(userProfile.FullName))
                                 {
-                                    if (!string.IsNullOrEmpty(userProfile.FullName))
-                                    {
-                                        firstName = userProfile.FullName.Split(' ')[0];
-                                        firstLetter = firstName.Substring(0, 1).ToUpper();
-                                    }
-
-                                    if (!string.IsNullOrEmpty(userProfile.PhoneNumber))
-                                    {
-                                        phoneNumber = userProfile.PhoneNumber;
-                                    }
+                                    firstName = userProfile.FullName.Split(' ')[0];
+                                    firstLetter = firstName.Substring(0, 1).ToUpper();
                                 }
                             }
-                            catch (Exception)
-                            {
-                                // If UserProfiles table doesn't exist, use Identity data
-                            }
+                            catch (Exception) { }
                         }
 
-                        <div class="welcome-message">
-                            <div class="user-name">Welcome, @firstName</div>
-                            <div class="user-role">
-                                <i class="fas fa-phone"></i> @phoneNumber
-                            </div>
+                        <div class="welcome-message d-none d-sm-flex">
+                            <div class="user-name">@firstName</div>
+                            <div class="user-role">@roleLabel</div>
                         </div>
 
                         <div class="profile-dropdown">
-                            <button class="profile-btn">
-                                <div class="profile-avatar">
-                                    @firstLetter
-                                </div>
-                                <i class="fas fa-chevron-down" style="font-size: 12px; color: #666;"></i>
+                            <button class="profile-btn" type="button">
+                                <div class="profile-avatar">@firstLetter</div>
+                                <i class="fas fa-chevron-down" style="font-size: 11px; color: #cbd5e1;"></i>
                             </button>
                             <div class="dropdown-menu">
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <a href="/Dashboard/Index" class="dropdown-item">
+                                        <i class="fas fa-tachometer-alt"></i>
+                                        <span>Admin Dashboard</span>
+                                    </a>
+                                    <div class="dropdown-divider"></div>
+                                }
                                 <a href="/Profile/Index" class="dropdown-item">
-                                    <i class="fas fa-user"></i>
+                                    <i class="fas fa-user-circle"></i>
                                     <span>My Profile</span>
                                 </a>
                                 <a href="/Booking/MyBookings" class="dropdown-item">
-                                    <i class="fas fa-calendar-alt"></i>
+                                    <i class="fas fa-suitcase-rolling"></i>
                                     <span>My Bookings</span>
                                 </a>
-                               
                                 <div class="dropdown-divider"></div>
                                 <form asp-controller="Login" asp-action="Logout" method="post" id="logoutForm" style="margin: 0;">
                                     @Html.AntiForgeryToken()
                                     <button type="submit" class="dropdown-item logout-btn" style="width: 100%; text-align: left; background: none; border: none; cursor: pointer;">
                                         <i class="fas fa-sign-out-alt"></i>
-                                        <span>Logout</span>
+                                        <span>Sign Out</span>
                                     </button>
                                 </form>
                             </div>
@@ -467,13 +456,12 @@
                 }
                 catch (Exception)
                 {
-                    <!-- Fallback if there's an error -->
                     <div class="auth-buttons">
                         <form asp-controller="Login" asp-action="Logout" method="post">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="logout-btn" style="background: none; border: none; color: #dc3545; cursor: pointer;">
+                            <button type="submit" class="login-btn" style="cursor: pointer;">
                                 <i class="fas fa-sign-out-alt"></i>
-                                <span>Logout</span>
+                                <span>Sign Out</span>
                             </button>
                         </form>
                     </div>
@@ -484,52 +472,14 @@
                 <div class="auth-buttons">
                     <a href="/Login/Login" class="login-btn">
                         <i class="fas fa-sign-in-alt"></i>
-                        <span>Login</span>
+                        <span>Sign In</span>
                     </a>
                     <a href="/Register/Register" class="register-btn">
                         <i class="fas fa-user-plus"></i>
-                        <span>Register</span>
+                        <span>Join Now</span>
                     </a>
                 </div>
             }
         </div>
     </div>
 </header>
-
-<script>
-    // Handle logout form submission
-    document.addEventListener('DOMContentLoaded', function() {
-        const logoutForm = document.getElementById('logoutForm');
-        if (logoutForm) {
-            logoutForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                if (confirm('Are you sure you want to logout?')) {
-                    this.submit();
-                }
-            });
-        }
-
-        // Add hover effect to profile dropdown on mobile
-        const profileDropdown = document.querySelector('.profile-dropdown');
-        if (profileDropdown) {
-            let timeout;
-
-            profileDropdown.addEventListener('touchstart', function(e) {
-                e.preventDefault();
-                const dropdownMenu = this.querySelector('.dropdown-menu');
-
-                if (dropdownMenu.style.display === 'block') {
-                    dropdownMenu.style.display = 'none';
-                } else {
-                    dropdownMenu.style.display = 'block';
-                    clearTimeout(timeout);
-
-                    // Close dropdown after 5 seconds
-                    timeout = setTimeout(() => {
-                        dropdownMenu.style.display = 'none';
-                    }, 5000);
-                }
-            });
-        }
-    });
-</script>

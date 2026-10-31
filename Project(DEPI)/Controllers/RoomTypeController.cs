@@ -1,11 +1,12 @@
-﻿using BookifyHotel.Model;
+using BookifyHotel.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PLL.Services;
+using System;
 
 namespace Project_DEPI_.Controllers
 {
-    [Authorize(Roles = "Admin")] 
+    [Authorize(Roles = "Admin")]
     public class RoomTypeController : Controller
     {
         private readonly RoomTypeService _roomTypeService;
@@ -40,7 +41,7 @@ namespace Project_DEPI_.Controllers
 
         // POST: RoomType/CreateSave
         [HttpPost]
-        [ValidateAntiForgeryToken] 
+        [ValidateAntiForgeryToken]
         public IActionResult CreateSave(RoomType roomType)
         {
             if (ModelState.IsValid)
@@ -88,6 +89,8 @@ namespace Project_DEPI_.Controllers
             return View("Edit", roomType);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
             var roomType = _roomTypeService.GetById(id);

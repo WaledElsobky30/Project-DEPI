@@ -1,4 +1,4 @@
-﻿@model BookifyHotel.Model.Room
+@model BookifyHotel.Model.Room
 @{
     ViewData["Title"] = "Room Details";
     Layout = "~/Views/Shared/_SideBarLayout.cshtml";
@@ -570,7 +570,7 @@
         // Confirm delete function
         function confirmDelete(roomId) {
             if (confirm('Are you sure you want to delete this room? This action cannot be undone.')) {
-                window.location.href = '@Url.Action("Delete", "Room")' + '?id=' + roomId;
+                submitAdminPost('@Url.Action("Delete", "Room")', { id: roomId });
             }
         }
     </script>

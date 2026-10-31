@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
@@ -235,7 +235,7 @@
                 </a>
             </li>
             <li>
-                <a href="/Payment/Index"> 
+                <a href="/Payment/Index">
                     <i class="fas fa-credit-card"></i>
                     <span>Payments</span>
                 </a>
@@ -246,18 +246,12 @@
                     <span>Users</span>
                 </a>
             </li>
-            @* <li>
-                <a href="#">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>Reports</span>
+            <li>
+                <a href="/Home/Index">
+                    <i class="fas fa-globe"></i>
+                    <span>Back to Website</span>
                 </a>
             </li>
-            <li>
-                <a href="#">
-                    <i class="fas fa-cog"></i>
-                    <span>Settings</span>
-                </a>
-            </li> *@
         </ul>
     </div>
 
@@ -266,7 +260,39 @@
         @RenderBody()
     </div>
 
+    <form id="adminAntiForgeryForm" method="post" style="display:none;">
+        @Html.AntiForgeryToken()
+    </form>
+
     <script>
+        function submitAdminPost(url, params) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = url;
+
+            const tokenInput = document.querySelector('#adminAntiForgeryForm input[name="__RequestVerificationToken"]');
+            if (tokenInput) {
+                const tokenClone = document.createElement('input');
+                tokenClone.type = 'hidden';
+                tokenClone.name = '__RequestVerificationToken';
+                tokenClone.value = tokenInput.value;
+                form.appendChild(tokenClone);
+            }
+
+            if (params) {
+                for (const [key, value] of Object.entries(params)) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = value;
+                    form.appendChild(input);
+                }
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+
         // Set active navigation item based on current page
         document.addEventListener('DOMContentLoaded', function() {
             const currentUrl = window.location.pathname.toLowerCase();

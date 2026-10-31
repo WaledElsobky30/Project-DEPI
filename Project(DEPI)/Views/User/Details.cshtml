@@ -1,4 +1,4 @@
-﻿@using BookifyHotel.Model
+@using BookifyHotel.Model
 @model UserProfile
 @{
     ViewData["Title"] = "UserProfile Details";
@@ -599,7 +599,7 @@
         // Confirm delete function
         function confirmDelete(userId, userName) {
             if (confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
-                window.location.href = '@Url.Action("Delete", "UserProfile")' + '?id=' + userId;
+                submitAdminPost('@Url.Action("Delete", "User")', { id: userId });
             }
         }
     </script>

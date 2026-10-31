@@ -1,4 +1,4 @@
-﻿@model BookifyHotel.Model.Booking
+@model BookifyHotel.Model.Booking
 @{
     ViewData["Title"] = "Booking Details";
     Layout = "~/Views/Shared/_SideBarLayout.cshtml";
@@ -740,14 +740,14 @@
         // Confirm delete function
         function confirmDelete(bookingId, bookingCode) {
             if (confirm(`Are you sure you want to delete booking ${bookingCode}? This action cannot be undone.`)) {
-                window.location.href = '@Url.Action("Delete", "Booking")' + '?id=' + bookingId;
+                submitAdminPost('@Url.Action("Delete", "Booking")', { id: bookingId });
             }
         }
 
         // Confirm status change
         function confirmStatusChange(newStatus) {
             if (confirm(`Are you sure you want to mark this booking as ${newStatus}?`)) {
-                window.location.href = '@Url.Action("UpdateStatus", "Booking")' + '?id=' + @Model.BookingId + '&status=' + newStatus;
+                submitAdminPost('@Url.Action("UpdateStatus", "Booking")', { id: @Model.BookingId, status: newStatus });
             }
         }
     </script>

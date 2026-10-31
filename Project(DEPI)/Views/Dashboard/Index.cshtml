@@ -1,5 +1,6 @@
-﻿@using BookifyHotel.Controllers
+@using BookifyHotel.Controllers
 @using Project_DEPI_.Controllers
+@using DAL.ViewModel
 @{
     ViewData["Title"] = "Dashboard Overview";
     Layout = "~/Views/Shared/_SideBarLayout.cshtml";
@@ -62,7 +63,7 @@
 
     <!-- Quick Actions -->
     <div class="quick-actions">
-        <div class="action-card" onclick="location.href='@Url.Action("Index", "Room")'">
+        <div class="action-card" onclick="location.href='@Url.Action("Index2", "Room")'">
             <div class="action-icon add-room">
                 <i class="fas fa-plus"></i>
             </div>

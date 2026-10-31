@@ -1,4 +1,4 @@
-﻿@model IEnumerable<DAL.ViewModel.UserViewModel>
+@model IEnumerable<DAL.ViewModel.UserViewModel>
 
 @{
     ViewData["Title"] = "Users Management";
@@ -454,7 +454,7 @@
     <script>
         function confirmDelete(userId, userName) {
             if (confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
-                window.location.href = '@Url.Action("Delete", "User")' + '?id=' + userId;
+                submitAdminPost('@Url.Action("Delete", "User")', { id: userId });
             }
         }
 

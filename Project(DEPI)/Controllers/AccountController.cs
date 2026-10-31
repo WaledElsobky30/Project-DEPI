@@ -1,9 +1,9 @@
-﻿using BookifyHotel.Data;
+using BookifyHotel.Data;
 using BookifyHotel.Model;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Threading.Tasks;
-using DAL.DataBase; 
 
 namespace BookifyHotel.Controllers
 {
@@ -11,15 +11,18 @@ namespace BookifyHotel.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly BookifyHotelDbContext _context;
 
         public RegisterController(
             UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager,
+            RoleManager<IdentityRole> roleManager,
             BookifyHotelDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _roleManager = roleManager;
             _context = context;
         }
 
@@ -36,7 +39,6 @@ namespace BookifyHotel.Controllers
             if (!ModelState.IsValid)
                 return View(newUser);
 
-           
             var appUser = new AppUser
             {
                 UserName = newUser.Email,
@@ -56,15 +58,19 @@ namespace BookifyHotel.Controllers
 
             try
             {
-                
+                // تعيين الرول الافتراضي للمستخدم الجديد
+                if (!await _roleManager.RoleExistsAsync("User"))
+                {
+                    await _roleManager.CreateAsync(new IdentityRole("User"));
+                }
+                await _userManager.AddToRoleAsync(appUser, "User");
+
                 var profile = new UserProfile
                 {
                     UserId = appUser.Id,
                     FullName = newUser.FullName,
                     Email = newUser.Email,
                     PhoneNumber = newUser.PhoneNumber,
-
-                    
                     ProfilePhoto = "default.png",
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now
@@ -73,6 +79,17 @@ namespace BookifyHotel.Controllers
                 // هنا بحط البيانات في الداتا بيز
                 _context.UserProfiles.Add(profile);
                 await _context.SaveChangesAsync();
+
+                var userRole = await _roleManager.FindByNameAsync("User");
+                if (userRole != null)
+                {
+                    _context.User_Roles.Add(new User_Role
+                    {
+                        UserProfileId = profile.Id,
+                        RoleId = userRole.Id
+                    });
+                    await _context.SaveChangesAsync();
+                }
 
                 //وهنا بسجل على طول 
                 await _signInManager.SignInAsync(appUser, isPersistent: false);

@@ -1,18 +1,14 @@
-﻿using AspNetCoreGeneratedDocument;
 using BookifyHotel.Data;
 using BookifyHotel.Model;
 using DAL.DataBase;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PLL.Services;
-using Stripe;
-//using Microsoft.EntityFrameworkCore.Proxies;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
 
 // أضف هذا السطر
 builder.Services.AddDbContext<BookifyHotelDbContext>(options =>
@@ -27,14 +23,12 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<RoomService>();
 builder.Services.AddScoped<RoomTypeService>();
-//builder.Services.AddScoped<RoleService>();
 builder.Services.AddScoped<RolePermissionService>();
 builder.Services.AddScoped<UserRoleService>();
 builder.Services.AddScoped<PermissionService>();
 builder.Services.AddScoped<ReservationCartService>();
 builder.Services.AddScoped<PaymentService>();
 builder.Services.AddScoped<BookingService>();
-
 
 // Identity registration
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
@@ -49,11 +43,14 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<BookifyHotelDbContext>()
 .AddDefaultTokenProviders();
 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Login/Login";
+    options.AccessDeniedPath = "/Home/Index";
+});
+
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
-
-
-
 
 var app = builder.Build();
 
@@ -80,21 +77,7 @@ app.MapControllerRoute(
     pattern: "{controller=BasePage}/{action=Index}/{id?}")
     .WithStaticAssets();
 
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<BookifyHotelDbContext>();
-    await dbContext.Database.MigrateAsync();
-
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    string[] roleNames = { "Admin", "User" };
-
-    foreach (var roleName in roleNames)
-    {
-        if (!await roleManager.RoleExistsAsync(roleName))
-        {
-            await roleManager.CreateAsync(new IdentityRole(roleName));
-        }
-    }
-}
+// Automatically migrate and seed realistic dummy data if the database is empty
+await DbInitializer.SeedAsync(app.Services);
 
 app.Run();

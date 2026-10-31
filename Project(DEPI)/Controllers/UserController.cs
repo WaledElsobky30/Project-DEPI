@@ -1,16 +1,19 @@
-﻿using BookifyHotel.Data;
+using BookifyHotel.Data;
 using BookifyHotel.Model;
 using DAL.ViewModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using PLL.Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Project_DEPI_.Controllers
 {
-    [Authorize(Roles = "Admin")] 
+    [Authorize(Roles = "Admin")]
     public class UserController : Controller
     {
         private readonly UserService _userService;
@@ -39,19 +42,21 @@ namespace Project_DEPI_.Controllers
             _context = context;
         }
 
-        #region Admin Dashboard CRUD Operations 
+        #region Admin Dashboard CRUD Operations
 
         public IActionResult Index()
         {
             var users = _userService.GetAll();
+            var rolesByUser = _userRoleService.GetAllUserRoleNamesByProfileId();
             var userViewModels = new List<UserViewModel>();
 
             foreach (var user in users)
             {
-                var userRoles = _userRoleService.GetUserRoles(user.Id);
-                var roleNames = userRoles.Select(ur => ur.Role?.Name).Where(r => r != null).ToList();
+                var roleNames = rolesByUser.TryGetValue(user.Id, out var roles) && roles.Any()
+                    ? roles
+                    : new List<string> { "User" };
 
-                var userViewModel = new UserViewModel
+                userViewModels.Add(new UserViewModel
                 {
                     UserId = user.Id,
                     FullName = user.FullName,
@@ -59,8 +64,7 @@ namespace Project_DEPI_.Controllers
                     PhoneNumber = user.PhoneNumber,
                     Roles = roleNames,
                     RoleNames = string.Join(", ", roleNames)
-                };
-                userViewModels.Add(userViewModel);
+                });
             }
             return View(userViewModels);
         }
@@ -76,18 +80,46 @@ namespace Project_DEPI_.Controllers
             return View(user);
         }
 
-        public IActionResult Delete(int id)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
         {
             var user = _userService.GetById(id);
             if (user == null) return NotFound();
-            _userService.Delete(id);
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser != null && user.UserId == currentUser.Id)
+            {
+                TempData["Error"] = "You cannot delete your own administrator account.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            try
+            {
+                var identityUserId = user.UserId;
+                _userService.Delete(id);
+
+                if (!string.IsNullOrEmpty(identityUserId))
+                {
+                    var identityUser = await _userManager.FindByIdAsync(identityUserId);
+                    if (identityUser != null)
+                    {
+                        await _userManager.DeleteAsync(identityUser);
+                    }
+                }
+                TempData["Success"] = "User deleted successfully.";
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "Cannot delete this user because they have active bookings.";
+            }
+
             return RedirectToAction(nameof(Index));
         }
 
         // GET: User/Create
         public IActionResult Create()
         {
-            // 👇👇 لازم نبعت الرولز هنا 👇👇
             ViewBag.Roles = new SelectList(_roleManager.Roles, "Name", "Name");
             return View();
         }
@@ -108,7 +140,7 @@ namespace Project_DEPI_.Controllers
                         if (existingUser != null)
                         {
                             ModelState.AddModelError("Email", "Email already exists!");
-                            ViewBag.Roles = new SelectList(_roleManager.Roles, "Name", "Name"); // إعادة تعبئة الرولز
+                            ViewBag.Roles = new SelectList(_roleManager.Roles, "Name", "Name");
                             return View(model);
                         }
 
@@ -128,7 +160,7 @@ namespace Project_DEPI_.Controllers
                             foreach (var error in result.Errors)
                                 ModelState.AddModelError("", error.Description);
 
-                            ViewBag.Roles = new SelectList(_roleManager.Roles, "Name", "Name"); // إعادة تعبئة الرولز
+                            ViewBag.Roles = new SelectList(_roleManager.Roles, "Name", "Name");
                             return View(model);
                         }
 
@@ -142,7 +174,7 @@ namespace Project_DEPI_.Controllers
                         }
                         else
                         {
-                            await _userManager.AddToRoleAsync(identityUser, "User"); // Default
+                            await _userManager.AddToRoleAsync(identityUser, "User");
                             model.UserRole = "User";
                         }
 
@@ -160,12 +192,7 @@ namespace Project_DEPI_.Controllers
                         var role = await _roleManager.FindByNameAsync(model.UserRole);
                         if (role != null)
                         {
-                            var userRoleEntity = new User_Role
-                            {
-                                UserProfileId = userProfile.Id,
-                                RoleId = role.Id
-                            };
-                            _userRoleService.Create(userRoleEntity);
+                            _userRoleService.ReplaceUserRoles(userProfile.Id, role.Id);
                         }
 
                         await transaction.CommitAsync();
@@ -180,7 +207,7 @@ namespace Project_DEPI_.Controllers
                 }
             }
 
-            ViewBag.Roles = new SelectList(_roleManager.Roles, "Name", "Name"); // إعادة تعبئة الرولز عند الخطأ
+            ViewBag.Roles = new SelectList(_roleManager.Roles, "Name", "Name");
             return View(model);
         }
 
@@ -191,7 +218,7 @@ namespace Project_DEPI_.Controllers
             if (user == null) return NotFound();
 
             var currentUser = await _userManager.GetUserAsync(User);
-            if (user.UserId == currentUser.Id)
+            if (currentUser != null && user.UserId == currentUser.Id)
             {
                 TempData["Warning"] = "Edit your own profile from Account Settings.";
                 return RedirectToAction("Index");
@@ -213,10 +240,9 @@ namespace Project_DEPI_.Controllers
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 IdentityUserId = user.UserId,
-                UserRole = currentRole // تعيين الرول الحالي في الموديل
+                UserRole = currentRole
             };
 
-            // 👇👇 إرسال الرولز للفيو 👇👇
             ViewBag.Roles = new SelectList(_roleManager.Roles, "Name", "Name", currentRole);
 
             return View(model);
@@ -267,19 +293,11 @@ namespace Project_DEPI_.Controllers
                                 await _userManager.RemoveFromRolesAsync(identityUser, currentRoles);
                                 await _userManager.AddToRoleAsync(identityUser, model.UserRole);
 
-                                // تحديث جدولنا الخاص User_Roles
+                                // تحديث جدولنا الخاص User_Roles مع حذف الأدوار القديمة أولاً
                                 var newRole = await _roleManager.FindByNameAsync(model.UserRole);
-
-                                // حذف القديم (محتاج دالة DeleteByUserProfileId في السيرفس أو تعملها هنا)
-                                // للتبسيط: هنضيف الجديد وخلاص، بس الأصح نمسح القديم الأول من User_Roles
                                 if (newRole != null)
                                 {
-                                    var userRoleEntity = new User_Role
-                                    {
-                                        UserProfileId = userProfile.Id,
-                                        RoleId = newRole.Id
-                                    };
-                                    _userRoleService.Create(userRoleEntity);
+                                    _userRoleService.ReplaceUserRoles(userProfile.Id, newRole.Id);
                                 }
                             }
                         }

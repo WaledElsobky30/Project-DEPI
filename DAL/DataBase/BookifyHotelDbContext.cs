@@ -1,4 +1,4 @@
-﻿using BookifyHotel.Configuration;
+using BookifyHotel.Configuration;
 using BookifyHotel.Model;
 using BookifyHotel.ModelConfiguration;
 using DAL.DataBase;
@@ -19,8 +19,7 @@ namespace BookifyHotel.Data
         {
         }
 
-        public DbSet<UserProfile> UserProfiles { get; set; }    
-        //public DbSet<Role> AppRoles { get; set; }
+        public DbSet<UserProfile> UserProfiles { get; set; }
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<User_Role> User_Roles { get; set; }
         public DbSet<RolePermission> Role_Permissions { get; set; }
@@ -32,7 +31,8 @@ namespace BookifyHotel.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder); 
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<UserProfile>().Ignore("UserID");
             modelBuilder.ApplyConfiguration(new ReservationCartConfiguration());
             modelBuilder.ApplyConfiguration(new PaymentConfiguration());
@@ -40,24 +40,7 @@ namespace BookifyHotel.Data
             modelBuilder.ApplyConfiguration(new RoomTypeConfiguration());
             modelBuilder.ApplyConfiguration(new RoomConfiguration());
 
-            modelBuilder.Entity<RolePermission>()
-                .HasKey(rp => new { rp.RoleId, rp.PermissionId });
-
-            modelBuilder.Entity<User_Role>()
-                .HasKey(ur => new { ur.UserProfileId, ur.RoleId });
-
-            //modelBuilder.ApplyConfiguration(new PermissionConfiguration());
-            //modelBuilder.ApplyConfiguration(new RoleConfiguration());
-
-            // 🛑 التعديل هنا: وقفنا السطر ده عشان كان بيتعارض مع الكود اللي تحت
-            // modelBuilder.ApplyConfiguration(new UserConfiguration());
-
-
-            // ❌ احذف هذه السطور
-            // modelBuilder.ApplyConfiguration(new RoleConfiguration());
-            // modelBuilder.ApplyConfiguration(new PermissionConfiguration());
-
-            // ✅ إعداد العلاقات الجديدة
+            // إعداد العلاقات المركبة
             modelBuilder.Entity<User_Role>()
                 .HasKey(ur => new { ur.UserProfileId, ur.RoleId });
 
@@ -71,29 +54,15 @@ namespace BookifyHotel.Data
                 .HasForeignKey<UserProfile>(up => up.UserId)
                 .IsRequired();
 
-
             modelBuilder.Entity<IdentityRole>().ToTable("AspNetRoles");
 
-
-            // ربط UserProfile بـ IdentityUser
-            //modelBuilder.Entity<UserProfile>()
-            //    .HasOne(up => up.IdentityUser)
-            //    .WithOne()
-            //    .HasForeignKey<UserProfile>(up => up.IdentityUserId)
-            //    .IsRequired();
-
-
-
-
             modelBuilder.Entity<Booking>()
-        .Property(b => b.TotalPrice)
-        .HasPrecision(18, 2);
+                .Property(b => b.TotalPrice)
+                .HasPrecision(18, 2);
 
             modelBuilder.Entity<ReservationCart>()
                 .Property(r => r.PricePreview)
                 .HasPrecision(18, 2);
-
-
         }
     }
 }

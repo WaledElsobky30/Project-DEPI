@@ -1,16 +1,21 @@
-﻿using BookifyHotel.Data;
+using BookifyHotel.Data;
 using BookifyHotel.Model;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PLL.Services;
-using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
 using Stripe;
 using Stripe.Checkout;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Project_DEPI_.Controllers
 {
+    [Authorize]
     public class BookingController : Controller
     {
         private readonly BookingService _bookingService;
@@ -37,26 +42,39 @@ namespace Project_DEPI_.Controllers
         }
 
         #region Admin Dashboard CRUD Operations
-        public IActionResult Index()
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Index()
         {
-            var Booking = _bookingService.GetAll();
-            return View(Booking);
+            var bookings = await _bookingService.GetAllWithDetailsAsync();
+            return View(bookings);
         }
 
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
-            var booking = _bookingService.GetById(id);
+            var booking = await _bookingService.GetByIdWithDetailsAsync(id);
             if (booking == null) return NotFound();
+
+            if (!User.IsInRole("Admin"))
+            {
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (booking.UserId != currentUserId)
+                {
+                    return Forbid();
+                }
+            }
+
             return View(booking);
         }
 
-        [HttpGet]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var booking = await _context.Bookings.FindAsync(id);
             if (booking != null)
             {
-                await UpdateRoomStatus(booking.RoomId, "Cancelled");
+                await RefreshRoomOccupancyStatusAsync(booking.RoomId, excludeBookingId: booking.BookingId);
                 _context.Bookings.Remove(booking);
                 await _context.SaveChangesAsync();
                 TempData["Success"] = "Booking deleted successfully.";
@@ -68,27 +86,32 @@ namespace Project_DEPI_.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateStatus(int id, string status)
+        {
+            var booking = await _context.Bookings.FindAsync(id);
+            if (booking == null)
+            {
+                TempData["Error"] = "Booking not found.";
+                return RedirectToAction("Index");
+            }
+
+            booking.Status = status;
+            await _context.SaveChangesAsync();
+            await RefreshRoomOccupancyStatusAsync(booking.RoomId);
+
+            TempData["Success"] = $"Booking status updated to {status}.";
+            return RedirectToAction("Details", new { id });
+        }
+
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create()
         {
             try
             {
-                var users = await _context.UserProfiles.Select(u => new { u.Id, u.FullName, u.Email }).ToListAsync();
-                var userList = users.Select(u => new SelectListItem { Value = u.Id.ToString(), Text = $"{u.FullName} ({u.Email})" }).ToList();
-
-                var availableRooms = await _context.Rooms
-                    .Where(r => r.IsAvailable && r.Status == "Available")
-                    .Include(r => r.RoomTypes)
-                    .Select(r => new { r.RoomId, r.RoomNumber, RoomType = r.RoomTypes.Name, PricePerNight = r.RoomTypes.PricePerNight })
-                    .ToListAsync();
-
-                var roomList = availableRooms.Select(r => new SelectListItem { Value = r.RoomId.ToString(), Text = $"Room {r.RoomNumber} - {r.RoomType} (${r.PricePerNight:N2}/night)" }).ToList();
-
-                ViewBag.Users = new SelectList(userList, "Value", "Text");
-                ViewBag.Rooms = new SelectList(roomList, "Value", "Text");
-                ViewBag.TodayDate = DateTime.Now.ToString("yyyy-MM-dd");
-                ViewBag.RoomsData = availableRooms.ToDictionary(r => r.RoomId.ToString(), r => new { r.RoomType, r.PricePerNight });
-
-                return View(new Booking());
+                return await LoadCreateViewData(new Booking());
             }
             catch (Exception ex)
             {
@@ -99,73 +122,127 @@ namespace Project_DEPI_.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(Booking booking)
         {
             try
             {
+                if (booking.CheckInDate >= booking.CheckOutDate)
+                {
+                    ModelState.AddModelError("CheckOutDate", "Check-out date must be after check-in date.");
+                }
+
                 if (ModelState.IsValid)
                 {
                     var room = await _context.Rooms.Include(r => r.RoomTypes).FirstOrDefaultAsync(r => r.RoomId == booking.RoomId);
-                    if (room == null) { ModelState.AddModelError("RoomId", "Selected room not found."); return await LoadCreateViewData(booking); }
-                    if (!room.IsAvailable) { ModelState.AddModelError("RoomId", "Selected room is not available."); return await LoadCreateViewData(booking); }
+                    if (room == null)
+                    {
+                        ModelState.AddModelError("RoomId", "Selected room not found.");
+                        return await LoadCreateViewData(booking);
+                    }
+                    if (!room.IsAvailable || room.Status == "Maintenance")
+                    {
+                        ModelState.AddModelError("RoomId", "Selected room is currently out of service.");
+                        return await LoadCreateViewData(booking);
+                    }
 
-                    var conflictingBooking = await _context.Bookings
-                        .Where(b => b.RoomId == booking.RoomId && b.Status != "Cancelled")
-                        .Where(b => (booking.CheckInDate >= b.CheckInDate && booking.CheckInDate < b.CheckOutDate) ||
-                                   (booking.CheckOutDate > b.CheckInDate && booking.CheckOutDate <= b.CheckOutDate) ||
-                                   (booking.CheckInDate <= b.CheckInDate && booking.CheckOutDate >= b.CheckOutDate))
-                        .FirstOrDefaultAsync();
+                    var isAvailableForDates = await _bookingService.IsRoomAvailableForDatesAsync(
+                        booking.RoomId, booking.CheckInDate, booking.CheckOutDate);
 
-                    if (conflictingBooking != null) { ModelState.AddModelError("", $"Room is already booked from {conflictingBooking.CheckInDate:MMM dd} to {conflictingBooking.CheckOutDate:MMM dd}"); return await LoadCreateViewData(booking); }
+                    if (!isAvailableForDates)
+                    {
+                        ModelState.AddModelError("", "Selected room is already booked during those dates.");
+                        return await LoadCreateViewData(booking);
+                    }
 
-                    var nights = (int)Math.Ceiling((booking.CheckOutDate - booking.CheckInDate).TotalDays);
+                    var userProfile = await _context.UserProfiles.FindAsync(booking.UserProfileId);
+                    if (userProfile != null)
+                    {
+                        booking.UserId = userProfile.UserId;
+                    }
+
+                    var nights = Math.Max((int)Math.Ceiling((booking.CheckOutDate - booking.CheckInDate).TotalDays), 1);
                     booking.TotalPrice = room.RoomTypes.PricePerNight * nights;
                     booking.BookingDate = DateTime.Now;
                     booking.Status = booking.Status ?? "Pending";
 
                     _bookingService.Create(booking);
-
-                    if (booking.Status == "Confirmed")
-                    {
-                        room.IsAvailable = false;
-                        room.Status = "Booked";
-                        await _context.SaveChangesAsync();
-                    }
+                    await RefreshRoomOccupancyStatusAsync(room.RoomId);
 
                     TempData["Success"] = $"Booking created successfully! Total: ${booking.TotalPrice:N2}";
                     return RedirectToAction("Index");
                 }
                 return await LoadCreateViewData(booking);
             }
-            catch (Exception ex) { ModelState.AddModelError("", $"Error creating booking: {ex.Message}"); return await LoadCreateViewData(booking); }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Error creating booking: {ex.Message}");
+                return await LoadCreateViewData(booking);
+            }
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id)
         {
             try
             {
-                var booking = await _context.Bookings.Include(b => b.UserProfile).Include(b => b.Room).ThenInclude(r => r.RoomTypes).FirstOrDefaultAsync(b => b.BookingId == id);
-                if (booking == null) { TempData["Error"] = "Booking not found."; return RedirectToAction("Index"); }
+                var booking = await _context.Bookings
+                    .Include(b => b.UserProfile)
+                    .Include(b => b.Room)
+                        .ThenInclude(r => r.RoomTypes)
+                    .FirstOrDefaultAsync(b => b.BookingId == id);
+
+                if (booking == null)
+                {
+                    TempData["Error"] = "Booking not found.";
+                    return RedirectToAction("Index");
+                }
                 return await LoadEditViewData(booking);
             }
-            catch (Exception ex) { TempData["Error"] = $"Error loading booking: {ex.Message}"; return RedirectToAction("Index"); }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error loading booking: {ex.Message}";
+                return RedirectToAction("Index");
+            }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(Booking booking)
         {
             try
             {
+                if (booking.CheckInDate >= booking.CheckOutDate)
+                {
+                    ModelState.AddModelError("CheckOutDate", "Check-out date must be after check-in date.");
+                }
+
                 if (ModelState.IsValid)
                 {
-                    var existingBooking = await _context.Bookings.Include(b => b.Room).ThenInclude(r => r.RoomTypes).FirstOrDefaultAsync(b => b.BookingId == booking.BookingId);
-                    if (existingBooking == null) { TempData["Error"] = "Booking not found."; return RedirectToAction("Index"); }
+                    var existingBooking = await _context.Bookings
+                        .Include(b => b.Room)
+                            .ThenInclude(r => r.RoomTypes)
+                        .FirstOrDefaultAsync(b => b.BookingId == booking.BookingId);
 
-                    if (existingBooking.RoomId != booking.RoomId)
+                    if (existingBooking == null)
                     {
-                        var newRoom = await _context.Rooms.FirstOrDefaultAsync(r => r.RoomId == booking.RoomId);
-                        if (newRoom == null || (!newRoom.IsAvailable && booking.Status != "Cancelled")) { ModelState.AddModelError("RoomId", "Selected room is not available."); return await LoadEditViewData(booking); }
+                        TempData["Error"] = "Booking not found.";
+                        return RedirectToAction("Index");
+                    }
+
+                    var previousRoomId = existingBooking.RoomId;
+
+                    if (booking.Status != "Cancelled")
+                    {
+                        var isAvailableForDates = await _bookingService.IsRoomAvailableForDatesAsync(
+                            booking.RoomId, booking.CheckInDate, booking.CheckOutDate, excludeBookingId: booking.BookingId);
+
+                        if (!isAvailableForDates)
+                        {
+                            ModelState.AddModelError("", "The selected room has a conflicting booking for these dates.");
+                            return await LoadEditViewData(booking);
+                        }
                     }
 
                     // تحديث البيانات
@@ -178,56 +255,83 @@ namespace Project_DEPI_.Controllers
                     var room = await _context.Rooms.Include(r => r.RoomTypes).FirstOrDefaultAsync(r => r.RoomId == booking.RoomId);
                     if (room != null)
                     {
-                        var nights = (int)Math.Ceiling((booking.CheckOutDate - booking.CheckInDate).TotalDays);
+                        var nights = Math.Max((int)Math.Ceiling((booking.CheckOutDate - booking.CheckInDate).TotalDays), 1);
                         existingBooking.TotalPrice = room.RoomTypes.PricePerNight * nights;
                     }
 
-                    await UpdateRoomStatus(existingBooking.RoomId, booking.Status);
                     _bookingService.Update(existingBooking);
+
+                    await RefreshRoomOccupancyStatusAsync(existingBooking.RoomId);
+                    if (previousRoomId != existingBooking.RoomId)
+                    {
+                        await RefreshRoomOccupancyStatusAsync(previousRoomId);
+                    }
 
                     TempData["Success"] = "Booking updated successfully!";
                     return RedirectToAction("Details", new { id = booking.BookingId });
                 }
                 return await LoadEditViewData(booking);
             }
-            catch (Exception ex) { ModelState.AddModelError("", $"Error updating booking: {ex.Message}"); return await LoadEditViewData(booking); }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Error updating booking: {ex.Message}");
+                return await LoadEditViewData(booking);
+            }
         }
 
         private async Task<ViewResult> LoadCreateViewData(Booking booking)
         {
             var users = await _context.UserProfiles.Select(u => new { u.Id, u.FullName, u.Email }).ToListAsync();
-            var rooms = await _context.Rooms.Where(r => r.IsAvailable).Include(r => r.RoomTypes).Select(r => new { r.RoomId, r.RoomNumber, RoomType = r.RoomTypes.Name, PricePerNight = r.RoomTypes.PricePerNight }).ToListAsync();
+            var rooms = await _context.Rooms
+                .Where(r => r.IsAvailable && r.Status != "Maintenance")
+                .Include(r => r.RoomTypes)
+                .Select(r => new { r.RoomId, r.RoomNumber, RoomType = r.RoomTypes.Name, PricePerNight = r.RoomTypes.PricePerNight })
+                .ToListAsync();
 
             ViewBag.Users = new SelectList(users.Select(u => new SelectListItem { Value = u.Id.ToString(), Text = $"{u.FullName} ({u.Email})" }), "Value", "Text");
             ViewBag.Rooms = new SelectList(rooms.Select(r => new SelectListItem { Value = r.RoomId.ToString(), Text = $"Room {r.RoomNumber} - {r.RoomType} (${r.PricePerNight:N2}/night)" }), "Value", "Text");
             ViewBag.TodayDate = DateTime.Now.ToString("yyyy-MM-dd");
             ViewBag.RoomsData = rooms.ToDictionary(r => r.RoomId.ToString(), r => new { r.RoomType, r.PricePerNight });
 
-            return View(booking);
+            return View("Create", booking);
         }
 
         private async Task<ViewResult> LoadEditViewData(Booking booking)
         {
             var users = await _context.UserProfiles.Select(u => new { u.Id, u.FullName, u.Email }).ToListAsync();
-            var rooms = await _context.Rooms.Include(r => r.RoomTypes).Select(r => new { r.RoomId, r.RoomNumber, RoomType = r.RoomTypes.Name, PricePerNight = r.RoomTypes.PricePerNight, IsAvailable = r.IsAvailable }).ToListAsync();
+            var rooms = await _context.Rooms
+                .Include(r => r.RoomTypes)
+                .Select(r => new { r.RoomId, r.RoomNumber, RoomType = r.RoomTypes.Name, PricePerNight = r.RoomTypes.PricePerNight, IsAvailable = r.IsAvailable })
+                .ToListAsync();
 
             ViewBag.Users = new SelectList(users.Select(u => new SelectListItem { Value = u.Id.ToString(), Text = $"{u.FullName} ({u.Email})", Selected = u.Id == booking.UserProfileId }), "Value", "Text");
-            ViewBag.Rooms = new SelectList(rooms.Select(r => new SelectListItem { Value = r.RoomId.ToString(), Text = $"Room {r.RoomNumber} - {r.RoomType} (${r.PricePerNight:N2}/night)" + (!r.IsAvailable && r.RoomId != booking.RoomId ? " [Not Available]" : ""), Selected = r.RoomId == booking.RoomId }), "Value", "Text");
+            ViewBag.Rooms = new SelectList(rooms.Select(r => new SelectListItem { Value = r.RoomId.ToString(), Text = $"Room {r.RoomNumber} - {r.RoomType} (${r.PricePerNight:N2}/night)" + (!r.IsAvailable && r.RoomId != booking.RoomId ? " [Maintenance]" : ""), Selected = r.RoomId == booking.RoomId }), "Value", "Text");
             ViewBag.TodayDate = DateTime.Now.ToString("yyyy-MM-dd");
             ViewBag.RoomsData = rooms.ToDictionary(r => r.RoomId.ToString(), r => new { r.RoomType, r.PricePerNight });
 
-            return View(booking);
+            return View("Edit", booking);
         }
 
-        private async Task UpdateRoomStatus(int roomId, string bookingStatus)
+        /// <summary>
+        /// Updates Room.Status ("Booked" vs "Available") based on whether there is an active confirmed booking covering today,
+        /// while keeping Room.IsAvailable true so future dates remain bookable.
+        /// </summary>
+        private async Task RefreshRoomOccupancyStatusAsync(int roomId, int? excludeBookingId = null)
         {
             var room = await _context.Rooms.FindAsync(roomId);
-            if (room != null)
-            {
-                if (bookingStatus == "Confirmed") { room.IsAvailable = false; room.Status = "Booked"; }
-                else if (bookingStatus == "Cancelled" || bookingStatus == "Completed") { room.IsAvailable = true; room.Status = "Available"; }
-                await _context.SaveChangesAsync();
-            }
+            if (room == null || room.Status == "Maintenance") return;
+
+            var today = DateTime.Today;
+            var isOccupiedToday = await _context.Bookings.AnyAsync(b =>
+                b.RoomId == roomId &&
+                (excludeBookingId == null || b.BookingId != excludeBookingId.Value) &&
+                b.Status == "Confirmed" &&
+                b.CheckInDate.Date <= today &&
+                b.CheckOutDate.Date > today);
+
+            room.Status = isOccupiedToday ? "Booked" : "Available";
+            room.IsAvailable = true;
+            await _context.SaveChangesAsync();
         }
         #endregion
 
@@ -248,21 +352,18 @@ namespace Project_DEPI_.Controllers
             return View();
         }
 
- 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> PayNow(int bookingId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return RedirectToAction("Login", "Account");
+            if (userId == null) return RedirectToAction("Login", "Login");
 
-            // بجيب الحجز
             var booking = await _context.Bookings
                 .Include(b => b.Room)
                 .ThenInclude(r => r.RoomTypes)
                 .FirstOrDefaultAsync(b => b.BookingId == bookingId && b.UserId == userId);
 
-            // بعد كده اتشيك عليه
             if (booking == null || booking.Status != "Pending")
             {
                 TempData["Error"] = "Booking not found or already paid.";
@@ -271,13 +372,13 @@ namespace Project_DEPI_.Controllers
 
             try
             {
-                //هنا هبدأ اظبط عملية الدفع بتاعت Stripe
                 StripeConfiguration.ApiKey = _configuration["Stripe:SecretKey"];
                 var domain = $"{this.Request.Scheme}://{this.Request.Host}";
 
                 var options = new SessionCreateOptions
                 {
                     PaymentMethodTypes = new List<string> { "card" },
+                    ClientReferenceId = booking.BookingId.ToString(),
                     LineItems = new List<SessionLineItemOptions>
                     {
                         new SessionLineItemOptions
@@ -296,13 +397,12 @@ namespace Project_DEPI_.Controllers
                         },
                     },
                     Mode = "payment",
-                    //دي بترجع تم الدفع وكده 
-                    SuccessUrl = domain + $"/Booking/PaymentSuccess?bookingId={booking.BookingId}&paymentMethod=Credit Card",
+                    SuccessUrl = domain + $"/Booking/PaymentSuccess?bookingId={booking.BookingId}&paymentMethod=Credit%20Card&session_id={{CHECKOUT_SESSION_ID}}",
                     CancelUrl = domain + $"/Booking/MyBookings",
                 };
 
                 var service = new SessionService();
-                Session session = service.Create(options);
+                Session session = await service.CreateAsync(options);
 
                 return Redirect(session.Url);
             }
@@ -312,48 +412,39 @@ namespace Project_DEPI_.Controllers
                 return RedirectToAction("MyBookings");
             }
         }
-        
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ConfirmBooking(int roomId, DateTime checkIn, DateTime checkOut, string paymentMethod)
         {
-            
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return RedirectToAction("Login", "Account");
+            if (userId == null) return RedirectToAction("Login", "Login");
 
             if (checkIn >= checkOut || checkIn < DateTime.Today)
             {
-                TempData["Error"] = "Please select valid dates.";
-                return RedirectToAction("Checkout", new { roomId = roomId });
+                TempData["Error"] = "Please select valid check-in and check-out dates.";
+                return RedirectToAction("Checkout", new { roomId });
             }
 
             var room = await _context.Rooms.Include(r => r.RoomTypes).FirstOrDefaultAsync(r => r.RoomId == roomId);
-            if (room == null || !room.IsAvailable)
+            if (room == null || !room.IsAvailable || room.Status == "Maintenance")
             {
-                TempData["Error"] = "Sorry, this room is no longer available.";
+                TempData["Error"] = "Sorry, this room is currently unavailable.";
                 return RedirectToAction("Index", "Home");
             }
 
-            var isTaken = await _context.Bookings
-                .AnyAsync(b => b.RoomId == roomId && b.Status != "Cancelled" &&
-                               ((checkIn >= b.CheckInDate && checkIn < b.CheckOutDate) ||
-                                (checkOut > b.CheckInDate && checkOut <= b.CheckOutDate) ||
-                                (checkIn <= b.CheckInDate && checkOut >= b.CheckOutDate)));
-
-            if (isTaken)
+            var isAvailable = await _bookingService.IsRoomAvailableForDatesAsync(roomId, checkIn, checkOut);
+            if (!isAvailable)
             {
                 TempData["Error"] = "This room is already booked for the selected dates.";
-                return RedirectToAction("Checkout", new { roomId = roomId });
+                return RedirectToAction("Checkout", new { roomId });
             }
 
-            var nights = (int)Math.Ceiling((checkOut - checkIn).TotalDays);
-            if (nights == 0) nights = 1;
+            var nights = Math.Max((int)Math.Ceiling((checkOut - checkIn).TotalDays), 1);
             var totalPrice = nights * room.RoomTypes.PricePerNight;
 
             var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(u => u.UserId == userId);
-            if (userProfile == null) return RedirectToAction("Register", "Account");
+            if (userProfile == null) return RedirectToAction("Register", "Register");
 
             try
             {
@@ -385,10 +476,8 @@ namespace Project_DEPI_.Controllers
                         TransactionRefrence = "CASH-ON-SITE"
                     };
                     _context.Payments.Add(payment);
-                    room.IsAvailable = false;
-                    room.Status = "Booked";
-                    _context.Rooms.Update(room);
                     await _context.SaveChangesAsync();
+                    await RefreshRoomOccupancyStatusAsync(room.RoomId);
 
                     TempData["Success"] = "Booking Confirmed! Please pay upon arrival.";
                     return RedirectToAction("MyBookings");
@@ -397,12 +486,12 @@ namespace Project_DEPI_.Controllers
                 if (paymentMethod == "Credit Card" || paymentMethod == "PayPal")
                 {
                     StripeConfiguration.ApiKey = _configuration["Stripe:SecretKey"];
-
                     var domain = $"{this.Request.Scheme}://{this.Request.Host}";
 
                     var options = new SessionCreateOptions
                     {
                         PaymentMethodTypes = new List<string> { "card" },
+                        ClientReferenceId = booking.BookingId.ToString(),
                         LineItems = new List<SessionLineItemOptions>
                         {
                             new SessionLineItemOptions
@@ -414,19 +503,19 @@ namespace Project_DEPI_.Controllers
                                     ProductData = new SessionLineItemPriceDataProductDataOptions
                                     {
                                         Name = $"Booking Room {room.RoomNumber}",
-                                        Description = $"Stay from {checkIn:dd/MM} to {checkOut:dd/MM}"
+                                        Description = $"Stay from {checkIn:dd/MM/yyyy} to {checkOut:dd/MM/yyyy}"
                                     },
                                 },
                                 Quantity = 1,
                             },
                         },
                         Mode = "payment",
-                        SuccessUrl = domain + $"/Booking/PaymentSuccess?bookingId={booking.BookingId}&paymentMethod={paymentMethod}",
+                        SuccessUrl = domain + $"/Booking/PaymentSuccess?bookingId={booking.BookingId}&paymentMethod={Uri.EscapeDataString(paymentMethod)}&session_id={{CHECKOUT_SESSION_ID}}",
                         CancelUrl = domain + $"/Booking/Checkout?roomId={roomId}",
                     };
 
                     var service = new SessionService();
-                    Session session = service.Create(options);
+                    Session session = await service.CreateAsync(options);
 
                     return Redirect(session.Url);
                 }
@@ -436,51 +525,81 @@ namespace Project_DEPI_.Controllers
             catch (Exception ex)
             {
                 TempData["Error"] = $"Error processing booking: {ex.Message}";
-                return RedirectToAction("Checkout", new { roomId = roomId });
+                return RedirectToAction("Checkout", new { roomId });
             }
         }
 
         [HttpGet]
-        public async Task<IActionResult> PaymentSuccess(int bookingId, string paymentMethod)
+        public async Task<IActionResult> PaymentSuccess(int bookingId, string paymentMethod, string? session_id = null)
         {
-            
-            var booking = await _context.Bookings.Include(b => b.Room).FirstOrDefaultAsync(b => b.BookingId == bookingId);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var booking = await _context.Bookings
+                .Include(b => b.Room)
+                .Include(b => b.Payments)
+                .FirstOrDefaultAsync(b => b.BookingId == bookingId && b.UserId == userId);
+
             if (booking == null) return NotFound();
 
-            booking.Status = "Confirmed";
-            _context.Bookings.Update(booking);
-
-            var payment = new Payment
+            if (booking.Status == "Confirmed" && booking.Payments.Any(p => p.PaymentStatus == "Completed"))
             {
-                BookingId = booking.BookingId,
-                Amount = booking.TotalPrice,
-                PaymentDate = DateTime.Now,
-                PaymentMethod = paymentMethod,
-                PaymentStatus = "Completed",
-                TransactionRefrence = Guid.NewGuid().ToString() // ده بنجيبه من Stripe
-            };
-            _context.Payments.Add(payment);
+                TempData["Success"] = "Your booking is already confirmed.";
+                return RedirectToAction("MyBookings");
+            }
 
-            var room = booking.Room;
-            room.IsAvailable = false;
-            room.Status = "Booked";
-            _context.Rooms.Update(room);
+            if (string.IsNullOrWhiteSpace(session_id))
+            {
+                TempData["Error"] = "Invalid payment session.";
+                return RedirectToAction("MyBookings");
+            }
 
-            await _context.SaveChangesAsync();
+            try
+            {
+                StripeConfiguration.ApiKey = _configuration["Stripe:SecretKey"];
+                var sessionService = new SessionService();
+                var session = await sessionService.GetAsync(session_id);
 
-            TempData["Success"] = "Payment Successful! Your booking is confirmed.";
-            return RedirectToAction("MyBookings");
+                if (session == null || session.PaymentStatus != "paid")
+                {
+                    TempData["Error"] = "Payment could not be verified as completed.";
+                    return RedirectToAction("MyBookings");
+                }
+
+                booking.Status = "Confirmed";
+                _context.Bookings.Update(booking);
+
+                var payment = new Payment
+                {
+                    BookingId = booking.BookingId,
+                    Amount = booking.TotalPrice,
+                    PaymentDate = DateTime.Now,
+                    PaymentMethod = paymentMethod,
+                    PaymentStatus = "Completed",
+                    TransactionRefrence = session.PaymentIntentId ?? session.Id
+                };
+                _context.Payments.Add(payment);
+
+                await _context.SaveChangesAsync();
+                await RefreshRoomOccupancyStatusAsync(booking.RoomId);
+
+                TempData["Success"] = "Payment Successful! Your booking is confirmed.";
+                return RedirectToAction("MyBookings");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Could not verify payment session: {ex.Message}";
+                return RedirectToAction("MyBookings");
+            }
         }
 
         public async Task<IActionResult> MyBookings()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var bookings = await _context.Bookings
-                                   .Include(b => b.Room)
-                                   .ThenInclude(r => r.RoomTypes)
-                                   .Where(b => b.UserId == userId)
-                                   .OrderByDescending(b => b.BookingDate)
-                                   .ToListAsync();
+                .Include(b => b.Room)
+                .ThenInclude(r => r.RoomTypes)
+                .Where(b => b.UserId == userId)
+                .OrderByDescending(b => b.BookingDate)
+                .ToListAsync();
 
             return View(bookings);
         }

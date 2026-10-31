@@ -1,174 +1,198 @@
-﻿@* Views/Shared/_Footer.cshtml *@
-
-<!-- ضيف Font Awesome في الـ Layout مش هنا -->
-<!-- <link rel="stylesheet" ...>  -->
-<!-- Flaticon uIcons Brands -->
-<link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-brands/css/uicons-brands.css">
+@* Views/Shared/_Footer.cshtml *@
 
 <style>
-    .luxury-footer * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
     .luxury-footer {
-        background-color: #1a1a1a;
-        color: #fff;
-        padding: 60px 0 20px;
+        background: #05070b;
+        color: #cbd5e1;
+        padding: 80px 0 30px;
+        border-top: 1px solid rgba(212, 175, 55, 0.2);
         margin-top: auto;
     }
 
-        .luxury-footer .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 40px;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
+    .luxury-footer .footer-content {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr 1fr 1.3fr;
+        gap: 48px;
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
 
-        .luxury-footer .footer-section h2 {
-            color: #b8860b;
-            margin-bottom: 20px;
-            font-size: 24px;
-        }
+    .luxury-footer .brand-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
 
-        .luxury-footer .footer-section h3 {
-            margin-bottom: 20px;
-            font-size: 20px;
-            color: #fff;
-        }
+    .luxury-footer .brand-title span {
+        color: #d4af37;
+    }
 
-        .luxury-footer .footer-links ul {
-            list-style: none;
-        }
+    .luxury-footer .brand-desc {
+        color: #94a3b8;
+        line-height: 1.7;
+        font-size: 0.94rem;
+        margin-bottom: 24px;
+    }
 
-        .luxury-footer .footer-links li {
-            margin-bottom: 12px;
-        }
+    .luxury-footer .footer-section h3 {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: #d4af37;
+        margin-bottom: 22px;
+    }
 
-        .luxury-footer .footer-links a {
-            color: #ddd;
-            text-decoration: none;
-            transition: color 0.3s;
-            display: block;
-        }
+    .luxury-footer .footer-links ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
 
-            .luxury-footer .footer-links a:hover {
-                color: #b8860b;
-                transform: translateX(5px);
-            }
+    .luxury-footer .footer-links li {
+        margin-bottom: 12px;
+    }
 
-        .luxury-footer .contact-info p {
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-        }
+    .luxury-footer .footer-links a {
+        color: #94a3b8;
+        text-decoration: none;
+        font-size: 0.94rem;
+        transition: all 0.25s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
 
-        .luxury-footer .contact-info i {
-            margin-right: 10px;
-            color: #b8860b;
-            width: 20px;
-            text-align: center;
-            font-size: 18px;
-        }
-
-        .luxury-footer .social-icons {
-            display: flex;
-            margin-top: 20px;
-            gap: 12px;
-        }
-
-            .luxury-footer .social-icons a {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 42px;
-                height: 42px;
-                background-color: #333;
-                color: white;
-                border-radius: 50%;
-                text-decoration: none;
-                transition: all 0.3s ease;
-                font-size: 20px;
-            }
-
-                .luxury-footer .social-icons a:hover {
-                    background-color: #b8860b;
-                    transform: translateY(-3px);
-                }
-
-        .luxury-footer .copyright {
-            text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #333;
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
-            color: #ddd;
-        }
-
-    @@media (max-width: 768px) {
-        .luxury-footer .footer-content
-
-    {
-        grid-template-columns: 1fr;
-        text-align: center;
+    .luxury-footer .footer-links a:hover {
+        color: #d4af37;
+        transform: translateX(4px);
     }
 
     .luxury-footer .contact-info p {
-        justify-content: center;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        color: #94a3b8;
+        font-size: 0.93rem;
+    }
+
+    .luxury-footer .contact-info i {
+        color: #d4af37;
+        margin-top: 4px;
     }
 
     .luxury-footer .social-icons {
-        justify-content: center;
+        display: flex;
+        gap: 12px;
     }
 
+    .luxury-footer .social-icons a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #e2e8f0;
+        border-radius: 10px;
+        text-decoration: none;
+        transition: all 0.25s ease;
+    }
+
+    .luxury-footer .social-icons a:hover {
+        background: linear-gradient(135deg, #b8860b, #d4af37);
+        color: #090d16;
+        border-color: transparent;
+        transform: translateY(-3px);
+    }
+
+    .luxury-footer .copyright {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-top: 60px;
+        padding: 24px 24px 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.07);
+        max-width: 1320px;
+        margin-left: auto;
+        margin-right: auto;
+        color: #64748b;
+        font-size: 0.86rem;
+    }
+
+    @@media (max-width: 992px) {
+        .luxury-footer .footer-content {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .luxury-footer .footer-content {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 
-
 <footer class="luxury-footer">
     <div class="footer-content">
-
-        <!-- LEFT SECTION -->
         <div class="footer-section">
-            <h2>Luxury Haven</h2>
-            <p>Experience unparalleled luxury and comfort at our premium hotel. Your perfect getaway awaits.</p>
-
+            <div class="brand-title">
+                <i class="fas fa-hotel" style="color: #d4af37;"></i>
+                Bookify<span>Hotel</span>
+            </div>
+            <p class="brand-desc">
+                Where timeless architectural elegance meets bespoke modern comfort. Experience curated suites, fine dining, and world-class hospitality.
+            </p>
             <div class="social-icons">
-                <a href="https://facebook.com" target="_blank"><i class="fi fi-brands-facebook"></i></a>
-                <a href="https://twitter.com" target="_blank"><i class="fi fi-brands-twitter"></i></a>
-                <a href="https://linkedin.com" target="_blank"><i class="fi fi-brands-linkedin"></i></a>
-                <a href="https://whatsapp.com" target="_blank"><i class="fi fi-brands-whatsapp"></i></a>
+                <a href="https://facebook.com" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="https://instagram.com" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="https://twitter.com" target="_blank" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
+                <a href="https://linkedin.com" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
             </div>
         </div>
 
-        <!-- QUICK LINKS -->
         <div class="footer-section footer-links">
-            <h3>Quick Links</h3>
+            <h3>Explore</h3>
             <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/about">About Us</a></li>
-                <li><a href="/rooms">Rooms</a></li>
-                <li><a href="/contact">Contact</a></li>
+                <li><a href="/Home/Index"><i class="fas fa-angle-right"></i> Home</a></li>
+                <li><a href="/Room/Index"><i class="fas fa-angle-right"></i> Rooms &amp; Suites</a></li>
+                <li><a href="/About/Index"><i class="fas fa-angle-right"></i> Our Story</a></li>
+                <li><a href="/Booking/MyBookings"><i class="fas fa-angle-right"></i> Manage Reservations</a></li>
             </ul>
         </div>
 
-        <!-- CONTACT INFO -->
-        <div class="footer-section contact-info">
-            <h3>Contact Info</h3>
-            <p><i class="fi fi-brands-whatsapp"></i> +1 (555) 123-4567</p>
-            <p><i class="fi fi-brands-twitter"></i> info@luxuryhaven.com</p>
-            <p><i class="fi fi-brands-facebook"></i> 123 Luxury Avenue, City</p>
+        <div class="footer-section footer-links">
+            <h3>Signature Suites</h3>
+            <ul>
+                <li><a href="/Room/Index"><i class="fas fa-angle-right"></i> Standard City Room</a></li>
+                <li><a href="/Room/Index"><i class="fas fa-angle-right"></i> Deluxe Ocean View</a></li>
+                <li><a href="/Room/Index"><i class="fas fa-angle-right"></i> Executive Junior Suite</a></li>
+                <li><a href="/Room/Index"><i class="fas fa-angle-right"></i> Royal Presidential Suite</a></li>
+            </ul>
         </div>
 
+        <div class="footer-section contact-info">
+            <h3>Private Concierge</h3>
+            <p><i class="fas fa-map-marker-alt"></i> 742 Grand Corniche Boulevard, Luxury District</p>
+            <p><i class="fas fa-phone-alt"></i> +1 (555) 123-4567</p>
+            <p><i class="fas fa-envelope"></i> concierge@bookifyhotel.com</p>
+            <p><i class="fas fa-clock"></i> Front Desk &amp; Butler Service: 24/7</p>
+        </div>
     </div>
 
     <div class="copyright">
-        <p>&copy; 2025 Luxury Haven. All rights reserved.</p>
+        <div>&copy; @DateTime.Now.Year BookifyHotel Luxury Hospitality. All rights reserved.</div>
+        <div>Crafted for Extraordinary Stays</div>
     </div>
 </footer>
