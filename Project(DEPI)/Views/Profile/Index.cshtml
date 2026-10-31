@@ -1,0 +1,146 @@
+﻿@model BookifyHotel.Model.UserProfile
+
+@{
+    ViewData["Title"] = "My Profile";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+   
+    .profile-page {
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+        min-height: 100vh;
+        padding: 120px 20px 60px;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+    }
+
+    
+    .glass-container {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        max-width: 800px;
+        width: 100%;
+    }
+
+    .profile-header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+        .profile-header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            background: linear-gradient(45deg, #b8860b, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+    .profile-picture {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 5px solid #b8860b;
+        margin: 20px auto;
+        display: block;
+        box-shadow: 0 0 20px rgba(184, 134, 11, 0.5);
+    }
+
+    
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 15px 0;
+        border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+        font-size: 1rem;
+    }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+    .detail-label {
+        color: #b8860b;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 150px;
+    }
+
+    .detail-value {
+        color: white;
+        text-align: right;
+        flex-grow: 1;
+    }
+
+    
+    .btn-edit {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #3b82f6, #2563eb); 
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        margin-top: 30px;
+        text-align: center;
+        text-decoration: none;
+        transition: all 0.3s;
+        box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+    }
+
+        .btn-edit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.5);
+            color: white;
+        }
+</style>
+
+<section class="profile-page">
+    <div class="glass-container">
+
+        <div class="profile-header">
+            <h1>@Model.FullName's Profile</h1>
+        </div>
+
+        <img src="@(string.IsNullOrEmpty(Model.ProfilePhoto) || Model.ProfilePhoto == "default.png" ? "/images/default.png" : Model.ProfilePhoto)"
+             alt="Profile Picture" class="profile-picture">
+
+        <div class="profile-details">
+            <div class="detail-row">
+                <span class="detail-label"><i class="fas fa-user"></i> Full Name</span>
+                <span class="detail-value">@Model.FullName</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label"><i class="fas fa-envelope"></i> Email</span>
+                <span class="detail-value">@ViewBag.Email</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label"><i class="fas fa-phone"></i> Phone Number</span>
+                <span class="detail-value">@ViewBag.PhoneNumber</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label"><i class="fas fa-calendar-alt"></i> Member Since</span>
+                <span class="detail-value">@Model.CreatedAt.ToString("MMM dd, yyyy")</span>
+            </div>
+        </div>
+
+        <a href="#" class="btn-edit">
+            <i class="fas fa-edit"></i> Edit Profile
+        </a>
+
+    </div>
+</section>

@@ -1,0 +1,640 @@
+﻿@model RegisterViewModel
+@{
+    ViewData["Title"] = "Create Account";
+    Layout = "~/Views/Shared/_EmptyLayoutRegister.cshtml";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] - BookifyHotel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0f172a;
+            --secondary: #b8860b;
+            --secondary-light: #d4af37;
+            --accent: #1e293b;
+            --text: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --error: #ef4444;
+            --success: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            max-width: 1200px;
+            width: 100%;
+            min-height: 90vh;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Left Side - Brand & Info */
+        .left-side {
+            flex: 1;
+            background: linear-gradient(135deg, rgba(184, 134, 11, 0.9), rgba(212, 175, 55, 0.9));
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .left-side::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.1)"/></svg>');
+                background-size: cover;
+            }
+
+        .brand {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 60px;
+        }
+
+            .brand h1 {
+                font-size: 2.8rem;
+                font-weight: 800;
+                margin-bottom: 10px;
+                letter-spacing: -0.5px;
+            }
+
+            .brand p {
+                font-size: 1.2rem;
+                opacity: 0.9;
+            }
+
+        .features {
+            position: relative;
+            z-index: 1;
+            margin-top: 40px;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.2rem;
+        }
+
+        .feature-text h4 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .feature-text p {
+            font-size: 0.95rem;
+            opacity: 0.8;
+        }
+
+        /* Right Side - Registration Form */
+        .right-side {
+            flex: 1.2;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            padding: 60px 50px;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .form-header {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+            .form-header h2 {
+                font-size: 2.2rem;
+                font-weight: 700;
+                color: white;
+                margin-bottom: 10px;
+            }
+
+            .form-header p {
+                color: var(--text-secondary);
+                font-size: 1rem;
+            }
+
+            .form-header a {
+                color: var(--secondary);
+                text-decoration: none;
+                font-weight: 600;
+            }
+
+                .form-header a:hover {
+                    text-decoration: underline;
+                }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--text);
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 16px 20px 16px 48px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+            .form-control:focus {
+                outline: none;
+                border-color: var(--secondary);
+                box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.2);
+                background: rgba(255, 255, 255, 0.1);
+            }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+            .password-toggle:hover {
+                color: var(--secondary);
+            }
+
+        .validation-message {
+            color: var(--error);
+            font-size: 0.85rem;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+        }
+
+            .validation-message i {
+                margin-right: 6px;
+            }
+
+        /* Submit Button */
+        .btn-submit {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--secondary), var(--secondary-light));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .btn-submit:hover {
+                background: linear-gradient(135deg, var(--secondary-light), var(--secondary));
+                transform: translateY(-2px);
+                box-shadow: 0 10px 25px rgba(184, 134, 11, 0.3);
+            }
+
+            .btn-submit i {
+                margin-right: 10px;
+                font-size: 1.2rem;
+            }
+
+        /* Form Footer */
+        .form-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+            .form-footer a {
+                color: var(--secondary);
+                text-decoration: none;
+                font-weight: 600;
+            }
+
+                .form-footer a:hover {
+                    text-decoration: underline;
+                }
+
+        /* Error Messages */
+        .validation-summary {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            color: var(--error);
+        }
+
+            .validation-summary ul {
+                list-style: none;
+                padding-left: 0;
+            }
+
+                .validation-summary ul li {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 8px;
+                }
+
+                    .validation-summary ul li i {
+                        margin-right: 8px;
+                    }
+
+        /* Success Message */
+        .success-message {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+        }
+
+            .success-message i {
+                margin-right: 10px;
+                font-size: 1.2rem;
+            }
+
+        /* Responsive Design */
+        @@media (max-width: 992px) {
+            .container
+
+        {
+            flex-direction: column;
+            max-width: 600px;
+        }
+
+        .left-side {
+            padding: 40px 30px;
+        }
+
+        .right-side {
+            padding: 40px 30px;
+            border-left: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        }
+
+        @@media (max-width: 576px) {
+            body
+
+        {
+            padding: 10px;
+        }
+
+        .container {
+            border-radius: 15px;
+        }
+
+        .left-side, .right-side {
+            padding: 30px 20px;
+        }
+
+        .brand h1 {
+            font-size: 2.2rem;
+        }
+
+        .form-header h2 {
+            font-size: 1.8rem;
+        }
+
+        }
+
+        /* Animation */
+        @@keyframes fadeIn {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
+
+        .right-side {
+            animation: fadeIn 0.6s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Side - Brand & Info -->
+        <div class="left-side">
+            <div class="brand">
+                <h1>BookifyHotel</h1>
+                <p>Your perfect stay starts here</p>
+            </div>
+
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="feature-text">
+                        <h4>Secure & Private</h4>
+                        <p>Your data is protected with enterprise-grade security</p>
+                    </div>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="feature-text">
+                        <h4>Instant Access</h4>
+                        <p>Get immediate access to booking and management features</p>
+                    </div>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-concierge-bell"></i>
+                    </div>
+                    <div class="feature-text">
+                        <h4>Premium Features</h4>
+                        <p>Exclusive benefits for registered members</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="position: relative; z-index: 1; margin-top: auto; padding-top: 30px;">
+                <p style="font-size: 0.9rem; opacity: 0.8;">
+                    <i class="fas fa-info-circle"></i> Already have an account?
+                    <a href="@Url.Action("Login", "Account")" style="color: white; font-weight: 600; text-decoration: underline;">Sign in here</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Right Side - Registration Form -->
+        <div class="right-side">
+            <div class="form-header">
+                <h2>Create Account</h2>
+                <p>Join BookifyHotel and start managing your bookings</p>
+            </div>
+
+            <!-- Display validation errors if any -->
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="validation-summary">
+                    <ul>
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>
+                                <i class="fas fa-exclamation-circle"></i>
+                                @error.ErrorMessage
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <form asp-action="Register" method="post" id="registerForm">
+                @Html.AntiForgeryToken()
+
+                <!-- Full Name -->
+                <div class="form-group">
+                    <label class="form-label" asp-for="FullName">Full Name</label>
+                    <div class="input-group">
+                        <i class="fas fa-user input-icon"></i>
+                        <input asp-for="FullName" class="form-control" placeholder="Enter your full name" required />
+                    </div>
+                    <span class="validation-message" asp-validation-for="FullName"></span>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label class="form-label" asp-for="Email">Email Address</label>
+                    <div class="input-group">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input asp-for="Email" class="form-control" type="email" placeholder="Enter your email" required />
+                    </div>
+                    <span class="validation-message" asp-validation-for="Email"></span>
+                </div>
+
+                <!-- Phone Number -->
+                <div class="form-group">
+                    <label class="form-label" asp-for="PhoneNumber">Phone Number</label>
+                    <div class="input-group">
+                        <i class="fas fa-phone input-icon"></i>
+                        <input asp-for="PhoneNumber" class="form-control" placeholder="Enter your phone number" required />
+                    </div>
+                    <span class="validation-message" asp-validation-for="PhoneNumber"></span>
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label class="form-label" asp-for="Password">Password</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input asp-for="Password" class="form-control" type="password" id="password" placeholder="Create a password" required />
+                        <button type="button" class="password-toggle" id="togglePassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <span class="validation-message" asp-validation-for="Password"></span>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="form-group">
+                    <label class="form-label" asp-for="ConfirmPassword">Confirm Password</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input asp-for="ConfirmPassword" class="form-control" type="password" id="confirmPassword" placeholder="Confirm your password" required />
+                        <button type="button" class="password-toggle" id="toggleConfirmPassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <span class="validation-message" asp-validation-for="ConfirmPassword"></span>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-user-plus"></i>
+                    Create Account
+                </button>
+            </form>
+
+            <div class="form-footer">
+                <p>
+                    By creating an account, you agree to our
+                    <a href="#">Terms of Service</a> and
+                    <a href="#">Privacy Policy</a>
+                </p>
+                <p style="margin-top: 15px;">
+                    Already have an account?
+                    <a href="@Url.Action("Login", "Account")">Sign in</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Password toggle functionality
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+
+        document.getElementById('toggleConfirmPassword').addEventListener('click', function() {
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const icon = this.querySelector('i');
+
+            if (confirmPasswordInput.type === 'password') {
+                confirmPasswordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                confirmPasswordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+
+        // Form validation
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Passwords do not match. Please check and try again.');
+                document.getElementById('confirmPassword').focus();
+                return false;
+            }
+
+            // Add loading state to button
+            const submitBtn = this.querySelector('.btn-submit');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+            submitBtn.disabled = true;
+
+            return true;
+        });
+
+        // Real-time password validation
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (confirmPassword && password !== confirmPassword) {
+                document.getElementById('confirmPassword').style.borderColor = 'var(--error)';
+            } else if (confirmPassword) {
+                document.getElementById('confirmPassword').style.borderColor = 'var(--success)';
+            }
+        });
+
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+
+            if (password !== confirmPassword) {
+                this.style.borderColor = 'var(--error)';
+            } else {
+                this.style.borderColor = 'var(--success)';
+            }
+        });
+
+        // Add focus effects
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.querySelector('.input-icon').style.color = 'var(--secondary)';
+            });
+
+            input.addEventListener('blur', function() {
+                this.parentElement.querySelector('.input-icon').style.color = 'var(--text-secondary)';
+            });
+        });
+    </script>
+
+    @section Scripts {
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+    }
+</body>
+</html>

@@ -1,0 +1,754 @@
+﻿@model BookifyHotel.Model.Booking
+@{
+    ViewData["Title"] = "Booking Details";
+    Layout = "~/Views/Shared/_SideBarLayout.cshtml";
+}
+
+<body data-active-page="bookings">
+    <div class="header">
+        <h2>Booking Details</h2>
+        <div class="user-info">
+            <div>
+                <h4>System Administrator</h4>
+                <p style="color: #b8860b;">Admin</p>
+            </div>
+            <img src="https://ui-avatars.com/api/?name=Admin&background=b8860b&color=fff" alt="User">
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <a href="@Url.Action("Index", "Booking")" class="back-btn">
+        <i class="fas fa-arrow-left"></i>
+        Back to Bookings
+    </a>
+    
+    @{
+        var nights = Math.Max((Model.CheckOutDate - Model.CheckInDate).Days, 1);
+        var pricePerNight = Model.Room?.RoomTypes?.PricePerNight ?? 0;
+        var calculatedTotalPrice = nights * pricePerNight;
+    }
+    @if (Model != null)
+    {
+     
+
+        <div class="details-container">
+            <!-- Booking Summary -->
+            <div class="summary-section">
+                <div class="summary-header">
+                    <div class="booking-title">
+                        <h1>Booking #BK@(Model.BookingId.ToString("D4"))</h1>
+                        <div class="booking-date">Created on @DateTime.Now.ToString("MMM dd, yyyy")</div>
+                    </div>
+                    <div class="status-badge @Model.Status.ToLower()">
+                        @Model.Status
+                    </div>
+                </div>
+
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">Total Amount</div>
+                        <div class="summary-value price">$@calculatedTotalPrice.ToString("N2")</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Nights Stay</div>
+                        <div class="summary-value">
+                            @nights nights
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Price Per Night</div>
+                        <div class="summary-value">$@pricePerNight.ToString("N2")</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Booking ID</div>
+                        <div class="summary-value">@Model.BookingId</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Guest & Room Info -->
+            <div class="info-sections">
+                <!-- Guest Information -->
+                <div class="info-section">
+                    <h3><i class="fas fa-user"></i> Guest Information</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Full Name</div>
+                            <div class="info-value">@Model.UserProfile?.FullName </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Email</div>
+                            <div class="info-value">@Model.UserProfile?.Email</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Phone</div>
+                            <div class="info-value">@(Model.UserProfile?.PhoneNumber ?? "Not provided")</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">User ID</div>
+                            <div class="info-value">@Model.UserProfileId</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Room Information -->
+                <div class="info-section">
+                    <h3><i class="fas fa-door-open"></i> Room Information</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Room Number</div>
+                            <div class="info-value">Room @Model.Room?.RoomNumber</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Room Type</div>
+                            <div class="info-value">@Model.Room?.RoomTypes?.Name</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Price Per Night</div>
+                            <div class="info-value">$@pricePerNight.ToString("N2")</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Floor</div>
+                            <div class="info-value">Floor @Model.Room?.Floor</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stay Details -->
+                <div class="info-section">
+                    <h3><i class="fas fa-calendar-alt"></i> Stay Details</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Check-in Date</div>
+                            <div class="info-value">@Model.CheckInDate.ToString("dddd, MMMM dd, yyyy")</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Check-out Date</div>
+                            <div class="info-value">@Model.CheckOutDate.ToString("dddd, MMMM dd, yyyy")</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Duration</div>
+                            <div class="info-value">@nights nights</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Total Calculation</div>
+                            <div class="info-value">@nights nights × $@pricePerNight.ToString("N2")</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Price Breakdown -->
+            <div class="price-breakdown-section">
+                <h3><i class="fas fa-receipt"></i> Price Breakdown</h3>
+                <div class="breakdown-grid">
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">Price per Night</div>
+                        <div class="breakdown-value">$@pricePerNight.ToString("N2")</div>
+                    </div>
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">Number of Nights</div>
+                        <div class="breakdown-value">@nights</div>
+                    </div>
+                    <div class="breakdown-item total">
+                        <div class="breakdown-label">Total Amount</div>
+                        <div class="breakdown-value">$@calculatedTotalPrice.ToString("N2")</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payments Section -->
+            <div class="payments-section">
+                <div class="section-header">
+                    <h3><i class="fas fa-credit-card"></i> Payment Information</h3>
+                    <div class="payment-status">
+                        @if (Model.Payments != null && Model.Payments.Any())
+                        {
+                            <span class="status paid">Paid</span>
+                        }
+                        else
+                        {
+                            <span class="status pending">Pending</span>
+                        }
+                    </div>
+                </div>
+
+                @if (Model.Payments != null && Model.Payments.Any())
+                {
+                    <div class="payments-list">
+                        @foreach (var payment in Model.Payments)
+                        {
+                            <div class="payment-item">
+                                <div class="payment-header">
+                                    <div class="payment-id">Payment #@payment.PaymentId</div>
+                                    <div class="payment-amount">$@payment.Amount.ToString("N2")</div>
+                                </div>
+                                <div class="payment-details">
+                                    <div class="payment-date">
+                                        <i class="fas fa-calendar"></i>
+                                        @payment.PaymentDate.ToString("MMM dd, yyyy")
+                                    </div>
+                                    <div class="payment-method">
+                                        <i class="fas fa-credit-card"></i>
+                                        @payment.PaymentMethod
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="no-payments">
+                        <i class="fas fa-credit-card"></i>
+                        <h4>No Payments Recorded</h4>
+                        <p>No payment information available for this booking.</p>
+                    </div>
+                }
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="@Url.Action("Edit", "Booking", new { id = Model.BookingId })" class="action-btn edit-btn">
+                    <i class="fas fa-edit"></i>
+                    Edit Booking
+                </a>
+                @if (Model.Status != "Cancelled" && Model.Status != "Completed")
+                {
+                    <button class="action-btn cancel-btn" onclick="confirmStatusChange('Cancelled')">
+                        <i class="fas fa-times"></i>
+                        Cancel Booking
+                    </button>
+                }
+                @if (Model.Status == "Confirmed")
+                {
+                    <button class="action-btn complete-btn" onclick="confirmStatusChange('Completed')">
+                        <i class="fas fa-check-double"></i>
+                        Mark Complete
+                    </button>
+                }
+                <button class="action-btn delete-btn" onclick="confirmDelete(@Model.BookingId, 'BK@(Model.BookingId.ToString("D4"))')">
+                    <i class="fas fa-trash"></i>
+                    Delete Booking
+                </button>
+                <a href="@Url.Action("Index", "Booking")" class="action-btn back-btn-main">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to List
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i class="fas fa-calendar-times"></i>
+            <h3>Booking Not Found</h3>
+            <p>The requested booking could not be found.</p>
+            <a href="@Url.Action("Index", "Booking")" class="action-btn edit-btn" style="margin-top: 20px; display: inline-block;">
+                <i class="fas fa-arrow-left"></i>
+                Back to Bookings
+            </a>
+        </div>
+    }
+
+    <style>
+        /* Back Button */
+        .back-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            text-decoration: none;
+            width: fit-content;
+        }
+
+            .back-btn:hover {
+                background: rgba(184, 134, 11, 0.1);
+                border-color: var(--secondary);
+            }
+
+        /* Details Container */
+        .details-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        /* Summary Section */
+        .summary-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .booking-title h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: white;
+        }
+
+        .booking-date {
+            color: #ccc;
+            font-size: 14px;
+        }
+
+        .status-badge {
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .confirmed {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .cancelled {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .completed {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .summary-label {
+            color: #ccc;
+            font-size: 12px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-value {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .price {
+            color: var(--secondary);
+            font-size: 24px;
+        }
+
+        /* Info Sections */
+        .info-sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .info-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+            .info-section h3 {
+                color: white;
+                font-size: 18px;
+                font-weight: 600;
+                margin-bottom: 20px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+                .info-section h3 i {
+                    color: var(--secondary);
+                }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .info-label {
+            color: #ccc;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Price Breakdown Section */
+        .price-breakdown-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+            .price-breakdown-section h3 {
+                color: white;
+                font-size: 18px;
+                font-weight: 600;
+                margin-bottom: 20px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+                .price-breakdown-section h3 i {
+                    color: var(--secondary);
+                }
+
+        .breakdown-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+            .breakdown-item.total {
+                border-top: 2px solid var(--secondary);
+                border-bottom: none;
+                padding-top: 20px;
+                margin-top: 10px;
+            }
+
+                .breakdown-item.total .breakdown-label {
+                    font-size: 16px;
+                    font-weight: 700;
+                    color: white;
+                }
+
+                .breakdown-item.total .breakdown-value {
+                    font-size: 20px;
+                    font-weight: 700;
+                    color: var(--secondary);
+                }
+
+        .breakdown-label {
+            color: #ccc;
+            font-size: 14px;
+        }
+
+        .breakdown-value {
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        /* Payments Section */
+        .payments-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+            .section-header h3 {
+                color: white;
+                font-size: 18px;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+                .section-header h3 i {
+                    color: var(--secondary);
+                }
+
+        .payment-status .status {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .paid {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .payments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .payment-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .payment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .payment-id {
+            font-weight: 600;
+            color: white;
+        }
+
+        .payment-amount {
+            font-weight: 700;
+            color: var(--secondary);
+            font-size: 16px;
+        }
+
+        .payment-details {
+            display: flex;
+            gap: 20px;
+            font-size: 12px;
+            color: #ccc;
+        }
+
+            .payment-details i {
+                color: var(--secondary);
+                margin-right: 5px;
+            }
+
+        .no-payments {
+            text-align: center;
+            padding: 40px 20px;
+            color: #ccc;
+        }
+
+            .no-payments i {
+                font-size: 48px;
+                color: var(--secondary);
+                margin-bottom: 15px;
+                opacity: 0.5;
+            }
+
+            .no-payments h4 {
+                font-size: 18px;
+                margin-bottom: 10px;
+                color: white;
+            }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .edit-btn {
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            color: white;
+        }
+
+            .edit-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(184, 134, 11, 0.4);
+            }
+
+        .cancel-btn {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+            .cancel-btn:hover {
+                background: rgba(239, 68, 68, 0.3);
+            }
+
+        .complete-btn {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+            .complete-btn:hover {
+                background: rgba(16, 185, 129, 0.3);
+            }
+
+        .delete-btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+            .delete-btn:hover {
+                background: rgba(239, 68, 68, 0.1);
+            }
+
+        .back-btn-main {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+            .back-btn-main:hover {
+                background: rgba(255, 255, 255, 0.1);
+            }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #ccc;
+        }
+
+            .empty-state i {
+                font-size: 64px;
+                color: var(--secondary);
+                margin-bottom: 20px;
+                opacity: 0.5;
+            }
+
+            .empty-state h3 {
+                font-size: 24px;
+                margin-bottom: 10px;
+                color: white;
+            }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .summary-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .info-sections {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .payment-details {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+
+    <script>
+        // Confirm delete function
+        function confirmDelete(bookingId, bookingCode) {
+            if (confirm(`Are you sure you want to delete booking ${bookingCode}? This action cannot be undone.`)) {
+                window.location.href = '@Url.Action("Delete", "Booking")' + '?id=' + bookingId;
+            }
+        }
+
+        // Confirm status change
+        function confirmStatusChange(newStatus) {
+            if (confirm(`Are you sure you want to mark this booking as ${newStatus}?`)) {
+                window.location.href = '@Url.Action("UpdateStatus", "Booking")' + '?id=' + @Model.BookingId + '&status=' + newStatus;
+            }
+        }
+    </script>
+</body>

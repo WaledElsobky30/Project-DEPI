@@ -1,0 +1,475 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Luxury Haven</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .about-section {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            padding: 100px 20px;
+        }
+
+        .about-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Our Story Section */
+        .story-section {
+            margin-bottom: 100px;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+            .section-header h2 {
+                font-size: 3rem;
+                font-weight: 300;
+                color: white;
+                margin-bottom: 20px;
+                background: linear-gradient(45deg, #b8860b, #ffd700);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+        .story-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .story-text {
+            color: white;
+        }
+
+            .story-text h3 {
+                font-size: 2rem;
+                font-weight: 300;
+                margin-bottom: 25px;
+                color: #b8860b;
+            }
+
+            .story-text p {
+                font-size: 1.1rem;
+                color: #ccc;
+                line-height: 1.8;
+                margin-bottom: 25px;
+            }
+
+        .mission-vision {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .mission-box, .vision-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 15px;
+            border-left: 4px solid #b8860b;
+            backdrop-filter: blur(10px);
+        }
+
+            .mission-box h4, .vision-box h4 {
+                color: #b8860b;
+                font-size: 1.3rem;
+                margin-bottom: 15px;
+                font-weight: 500;
+            }
+
+            .mission-box p, .vision-box p {
+                color: #ccc;
+                line-height: 1.7;
+                font-size: 1rem;
+            }
+
+        .story-image {
+            width: 100%;
+            height: 500px;
+            background-image: url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80');
+            background-size: cover;
+            background-position: center;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Why Choose Us Section */
+        .why-choose-section {
+            margin-bottom: 80px;
+        }
+
+        .why-choose-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+            .why-choose-header h2 {
+                font-size: 2.8rem;
+                font-weight: 300;
+                color: white;
+                margin-bottom: 15px;
+            }
+
+            .why-choose-header p {
+                font-size: 1.2rem;
+                color: #ccc;
+                max-width: 600px;
+                margin: 0 auto;
+                line-height: 1.6;
+            }
+
+        .divider {
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(45deg, #b8860b, #ffd700);
+            margin: 20px auto;
+            border: none;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 40px 30px;
+            border-radius: 15px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+            .feature-card:hover {
+                transform: translateY(-10px);
+                border-color: rgba(184, 134, 11, 0.3);
+                box-shadow: 0 20px 40px rgba(184, 134, 11, 0.2);
+            }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #b8860b, #d4af37);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            font-size: 2rem;
+            color: white;
+        }
+
+        .feature-card h3 {
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .feature-card p {
+            color: #ccc;
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            background: rgba(184, 134, 11, 0.1);
+            padding: 80px 40px;
+            border-radius: 20px;
+            margin-top: 60px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            text-align: center;
+        }
+
+        .stat-item {
+            color: white;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 300;
+            color: #b8860b;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #ccc;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 992px) {
+            .story-content
+
+        {
+            grid-template-columns: 1fr;
+            gap: 40px;
+        }
+
+        .mission-vision {
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        .story-image {
+            height: 400px;
+            order: -1;
+        }
+
+        }
+
+        @@media (max-width: 768px) {
+            .about-section
+
+        {
+            padding: 80px 20px;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+        }
+
+        .story-text h3 {
+            font-size: 1.8rem;
+        }
+
+        .why-choose-header h2 {
+            font-size: 2.3rem;
+        }
+
+        .features-grid {
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+        }
+
+        }
+
+        @@media (max-width: 480px) {
+            .section-header h2
+
+        {
+            font-size: 2rem;
+        }
+
+        .mission-box, .vision-box {
+            padding: 25px 20px;
+        }
+
+        .feature-card {
+            padding: 30px 25px;
+        }
+
+        .stats-section {
+            padding: 60px 20px;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        }
+    </style>
+</head>
+<body>
+    <!-- قسم About المتكامل -->
+    <section class="about-section">
+        <div class="about-container">
+
+            <!-- Our Story Section -->
+            <div class="story-section">
+                <div class="section-header">
+                    <h2>Our Story</h2>
+                </div>
+
+                <div class="story-content">
+                    <div class="story-text">
+                        <h3>Our Journey of Excellence</h3>
+                        <p>
+                            Founded in 1995, Luxury Haven has been a beacon of hospitality excellence for nearly three decades.
+                            What started as a small boutique hotel has grown into a premier destination for travelers seeking
+                            the perfect blend of comfort, luxury, and personalized service.
+                        </p>
+                        <p>
+                            Our journey has been marked by a commitment to excellence and a passion for creating memorable experiences.
+                            Every guest who walks through our doors becomes part of our extended family, and we take pride in
+                            exceeding expectations at every turn.
+                        </p>
+                        <p>
+                            Today, we continue to set the standard for luxury hospitality, combining timeless elegance with
+                            modern amenities to create an unparalleled guest experience.
+                        </p>
+
+                        <div class="mission-vision">
+                            <div class="mission-box">
+                                <h4>Our Mission</h4>
+                                <p>
+                                    To provide exceptional hospitality experiences that exceed guest expectations through
+                                    personalized service, attention to detail, and a commitment to excellence. We strive to
+                                    create a home away from home where every guest feels valued and cherished.
+                                </p>
+                            </div>
+                            <div class="vision-box">
+                                <h4>Our Vision</h4>
+                                <p>
+                                    To be recognized as the leading luxury hotel brand, setting the benchmark for quality,
+                                    innovation, and guest satisfaction. We envision a future where Luxury Haven is synonymous
+                                    with exceptional hospitality worldwide.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="story-image"></div>
+                </div>
+            </div>
+
+            <!-- Why Choose Us Section -->
+            <div class="why-choose-section">
+                <div class="why-choose-header">
+                    <h2>Why Choose Us</h2>
+                    <p>Discover what makes Luxury Haven the perfect choice for your next stay</p>
+                    <hr class="divider">
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-gem"></i>
+                        </div>
+                        <h3>Premium Quality</h3>
+                        <p>
+                            We maintain the highest standards of service and accommodation to ensure your complete satisfaction.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3>Expert Team</h3>
+                        <p>
+                            Our dedicated staff is trained to provide personalized service and attention to every guest.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <h3>Guest First</h3>
+                        <p>
+                            Your comfort and happiness are our top priorities. We go above and beyond for every guest.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-sync-alt"></i>
+                        </div>
+                        <h3>Continuous Innovation</h3>
+                        <p>
+                            We constantly improve our facilities and services to provide the best possible experience.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Stats Section -->
+                <div class="stats-section">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number">25+</div>
+                            <div class="stat-label">Years Experience</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">150+</div>
+                            <div class="stat-label">Luxury Rooms</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">50k+</div>
+                            <div class="stat-label">Happy Guests</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">24/7</div>
+                            <div class="stat-label">Service</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <script>
+        // إضافة تأثيرات تفاعلية للبطاقات
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px)';
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // تأثيرات للعدادات (يمكن إضافة animation للعدادات)
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const statNumber = entry.target.querySelector('.stat-number');
+                    const target = parseInt(statNumber.textContent);
+                    let current = 0;
+                    const increment = target / 50;
+
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= target) {
+                            statNumber.textContent = target + '+';
+                            clearInterval(timer);
+                        } else {
+                            statNumber.textContent = Math.floor(current) + '+';
+                        }
+                    }, 50);
+
+                    observer.unobserve(entry.target);
+                }
+            });
+        });
+
+        document.querySelectorAll('.stat-item').forEach(stat => {
+            observer.observe(stat);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,353 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amenities & Reviews - Luxury Haven</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .amenities-reviews-section {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            padding: 100px 20px;
+            min-height: 100vh;
+        }
+
+        .section-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* قسم المرافق */
+        .amenities-section {
+            margin-bottom: 100px;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+            .section-header h2 {
+                font-size: 3rem;
+                font-weight: 300;
+                color: white;
+                margin-bottom: 20px;
+                background: linear-gradient(45deg, #b8860b, #ffd700);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            .section-header p {
+                font-size: 1.2rem;
+                color: #ccc;
+                line-height: 1.6;
+                max-width: 600px;
+                margin: 0 auto;
+            }
+
+        .amenities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .amenity-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 40px 30px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+            .amenity-card:hover {
+                transform: translateY(-5px);
+                border-color: rgba(184, 134, 11, 0.3);
+                box-shadow: 0 15px 30px rgba(184, 134, 11, 0.2);
+            }
+
+        .amenity-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #b8860b, #d4af37);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .amenity-card h3 {
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        /* قسم التقييمات */
+        .reviews-section {
+            margin-bottom: 60px;
+        }
+
+        .reviews-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+            .reviews-header h2 {
+                font-size: 2.5rem;
+                font-weight: 300;
+                color: white;
+                margin-bottom: 15px;
+            }
+
+            .reviews-header p {
+                font-size: 1.1rem;
+                color: #ccc;
+                max-width: 500px;
+                margin: 0 auto;
+                line-height: 1.6;
+            }
+
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .review-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+            .review-card:hover {
+                transform: translateY(-5px);
+                border-color: rgba(184, 134, 11, 0.3);
+            }
+
+        .review-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .review-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #b8860b, #d4af37);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-right: 15px;
+        }
+
+        .review-info {
+            flex: 1;
+        }
+
+            .review-info h4 {
+                color: white;
+                font-size: 1.1rem;
+                font-weight: 500;
+                margin-bottom: 5px;
+            }
+
+        .review-date {
+            color: #b8860b;
+            font-size: 0.9rem;
+        }
+
+        .review-text {
+            color: #ccc;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 768px) {
+            .amenities-reviews-section
+
+        {
+            padding: 80px 20px;
+        }
+
+        .section-header h2 {
+            font-size: 2.3rem;
+        }
+
+        .section-header p {
+            font-size: 1.1rem;
+        }
+
+        .amenities-grid {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .amenity-card {
+            padding: 30px 20px;
+        }
+
+        .reviews-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .reviews-header h2 {
+            font-size: 2rem;
+        }
+
+        }
+
+        @@media (max-width: 480px) {
+            .section-header h2
+
+        {
+            font-size: 2rem;
+        }
+
+        .amenities-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .review-card {
+            padding: 25px 20px;
+        }
+
+        }
+    </style>
+</head>
+<body>
+    <!-- قسم المرافق والتقييمات -->
+    <section class="amenities-reviews-section">
+        <div class="section-container">
+
+            <!-- قسم المرافق -->
+            <div class="amenities-section">
+                <div class="section-header">
+                    <h2>Premium Amenities</h2>
+                    <p>Enjoy world-class facilities and services during your stay</p>
+                </div>
+
+                <div class="amenities-grid">
+                    <!-- مرافق 1 -->
+                    <div class="amenity-card">
+                        <div class="amenity-icon">
+                            <i class="fas fa-wifi"></i>
+                        </div>
+                        <h3>Free WiFi</h3>
+                    </div>
+
+                    <!-- مرافق 2 -->
+                    <div class="amenity-card">
+                        <div class="amenity-icon">
+                            <i class="fas fa-swimming-pool"></i>
+                        </div>
+                        <h3>Swimming Pool</h3>
+                    </div>
+
+                    <!-- مرافق 3 -->
+                    <div class="amenity-card">
+                        <div class="amenity-icon">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <h3>Breakfast Included</h3>
+                    </div>
+
+                    <!-- مرافق 4 -->
+                    <div class="amenity-card">
+                        <div class="amenity-icon">
+                            <i class="fas fa-parking"></i>
+                        </div>
+                        <h3>Free Parking</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- قسم التقييمات -->
+            <div class="reviews-section">
+                <div class="reviews-header">
+                    <h2>What Our Guests Say</h2>
+                    <p>Read reviews from our satisfied guests who experienced luxury at its finest.</p>
+                </div>
+
+                <div class="reviews-grid">
+                    <!-- تقييم 1 -->
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div class="review-avatar">SJ</div>
+                            <div class="review-info">
+                                <h4>Sarah Johnson</h4>
+                                <div class="review-date">Nov 15, 2023</div>
+                            </div>
+                        </div>
+                        <p class="review-text">
+                            Absolutely stunning hotel! The service was impeccable and the room was beautiful. Will definitely return.
+                        </p>
+                    </div>
+
+                    <!-- تقييم 2 -->
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div class="review-avatar">MC</div>
+                            <div class="review-info">
+                                <h4>Michael Chen</h4>
+                                <div class="review-date">Nov 10, 2023</div>
+                            </div>
+                        </div>
+                        <p class="review-text">
+                            Best hotel experience I have had. The attention to detail and luxury amenities exceeded all expectations.
+                        </p>
+                    </div>
+
+                    <!-- تقييم 3 -->
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div class="review-avatar">ER</div>
+                            <div class="review-info">
+                                <h4>Emily Rodriguez</h4>
+                                <div class="review-date">Nov 5, 2023</div>
+                            </div>
+                        </div>
+                        <p class="review-text">
+                            Great location and wonderful staff. The breakfast was delicious and the pool area was very relaxing.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <script>
+        // إضافة تأثيرات تفاعلية للبطاقات
+        document.querySelectorAll('.amenity-card, .review-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>

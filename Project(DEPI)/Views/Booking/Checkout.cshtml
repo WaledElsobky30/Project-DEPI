@@ -1,0 +1,314 @@
+﻿@{
+    ViewData["Title"] = "Complete Booking";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    /* 1. الخلفية (نفس الروح) */
+    .checkout-page {
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+        min-height: 100vh;
+        padding: 120px 20px 60px;
+        color: white;
+    }
+
+    /* 2. الحاوية الزجاجية */
+    .glass-container {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    /* 3. العنوان */
+    .checkout-header {
+        text-align: center;
+        margin-bottom: 40px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding-bottom: 20px;
+    }
+
+        .checkout-header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin: 0;
+            background: linear-gradient(45deg, #b8860b, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .checkout-header p {
+            color: #ccc;
+            font-size: 1.1rem;
+            margin-top: 10px;
+        }
+
+    /* 4. التقسيمة (Grid) */
+    .checkout-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr;
+        gap: 40px;
+    }
+
+    /* --- الجزء الأيسر: ملخص الغرفة --- */
+    .room-summary {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 15px;
+        padding: 25px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        height: fit-content;
+    }
+
+    .summary-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .summary-title {
+        font-size: 1.5rem;
+        color: white;
+        margin-bottom: 5px;
+    }
+
+    .summary-type {
+        color: #b8860b;
+        font-size: 1rem;
+        margin-bottom: 20px;
+        display: block;
+    }
+
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        color: #ccc;
+    }
+
+        .price-row.total {
+            border-bottom: none;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+    .total-amount {
+        color: #b8860b;
+        font-size: 1.5rem;
+    }
+
+    /* --- الجزء الأيمن: فورم الحجز --- */
+    .booking-form-container {
+        padding: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 10px;
+        color: #b8860b;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        color: white;
+        font-size: 1rem;
+        transition: all 0.3s;
+        color-scheme: dark;
+    }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #b8860b;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 0 4px rgba(184, 134, 11, 0.1);
+        }
+
+        /* تنسيق خيارات القائمة المنسدلة لتكون داكنة */
+        .form-input option {
+            background-color: #1a1a1a;
+            color: white;
+            padding: 10px;
+        }
+
+    .btn-confirm {
+        width: 100%;
+        background: linear-gradient(135deg, #b8860b, #d4af37);
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 10px;
+        box-shadow: 0 5px 15px rgba(184, 134, 11, 0.3);
+    }
+
+        .btn-confirm:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(184, 134, 11, 0.5);
+        }
+
+    @@media (max-width: 992px) {
+        .checkout-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .room-summary {
+            margin-bottom: 30px;
+        }
+    }
+</style>
+
+<section class="checkout-page">
+    <div class="glass-container">
+
+        <div class="checkout-header">
+            <h1>Confirm Your Stay</h1>
+            <p>You are just one step away from your luxury experience</p>
+        </div>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger" style="background: rgba(220, 53, 69, 0.2); border: 1px solid #dc3545; color: #ffcccc; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                <i class="fas fa-exclamation-circle me-2"></i> @TempData["Error"]
+            </div>
+        }
+
+        <div class="checkout-grid">
+
+            <div class="room-summary">
+                <img src="@(string.IsNullOrEmpty(ViewBag.ImageUrl) ? "https://images.unsplash.com/photo-1611892440504-42a792e24d32" : ViewBag.ImageUrl)"
+                     class="summary-image" alt="Room Image">
+
+                <h3 class="summary-title">Room @ViewBag.RoomNumber</h3>
+                <span class="summary-type">@ViewBag.RoomType</span>
+
+                <div class="price-calculations">
+                    <div class="price-row">
+                        <span>Price per Night</span>
+                        <span>$@ViewBag.PricePerNight</span>
+                    </div>
+                    <div class="price-row">
+                        <span>Nights</span>
+                        <span id="displayNights">0</span>
+                    </div>
+                    <div class="price-row total">
+                        <span>Total Due</span>
+                        <span class="total-amount">$<span id="displayTotal">0.00</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="booking-form-container">
+                <form asp-action="ConfirmBooking" asp-controller="Booking" method="post">
+                    <input type="hidden" name="roomId" value="@ViewBag.RoomId" />
+
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-calendar-check me-2"></i> Check-In Date</label>
+                        <input type="date" name="checkIn" id="checkIn" class="form-input" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-calendar-times me-2"></i> Check-Out Date</label>
+                        <input type="date" name="checkOut" id="checkOut" class="form-input" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-wallet me-2"></i> Payment Method</label>
+                        <select name="paymentMethod" class="form-input" required>
+                            <option value="Credit Card">Credit Card (Visa/Mastercard)</option>
+                            <option value="PayPal">PayPal</option>
+                            <option value="Cash">Cash on Arrival</option>
+                        </select>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                        <h5 style="color: #b8860b; font-size: 0.9rem; margin-bottom: 10px;">
+                            <i class="fas fa-info-circle"></i> Booking Policies
+                        </h5>
+                        <ul style="color: #999; font-size: 0.85rem; padding-left: 20px; margin: 0;">
+                            <li>Check-in after 2:00 PM</li>
+                            <li>Check-out before 12:00 PM</li>
+                            <li>Free cancellation up to 24 hours before check-in</li>
+                        </ul>
+                    </div>
+
+                    <button type="submit" class="btn-confirm">
+                        Confirm & Pay <i class="fas fa-arrow-right ms-2"></i>
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<script>
+    // متغيرات السعر من السيرفر
+    const pricePerNight = @ViewBag.PricePerNight;
+
+    // العناصر
+    const checkInInput = document.getElementById('checkIn');
+    const checkOutInput = document.getElementById('checkOut');
+    const displayNights = document.getElementById('displayNights');
+    const displayTotal = document.getElementById('displayTotal');
+
+    // تحديد تاريخ اليوم كحد أدنى
+    const today = new Date().toISOString().split("T")[0];
+    checkInInput.min = today;
+    checkOutInput.min = today;
+
+    // دالة الحساب
+    function calculateTotal() {
+        const d1 = new Date(checkInInput.value);
+        const d2 = new Date(checkOutInput.value);
+
+        // التأكد إن التواريخ صحيحة وتاريخ الخروج بعد الدخول
+        if (checkInInput.value && checkOutInput.value && d2 > d1) {
+            const timeDiff = Math.abs(d2 - d1);
+            const days = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+            displayNights.innerText = days;
+            displayTotal.innerText = (days * pricePerNight).toFixed(2);
+        } else {
+            displayNights.innerText = "0";
+            displayTotal.innerText = "0.00";
+        }
+    }
+
+    // تحديث الحد الأدنى للخروج لما تختار الدخول
+    checkInInput.addEventListener('change', function() {
+        checkOutInput.min = this.value;
+        calculateTotal();
+    });
+
+    checkOutInput.addEventListener('change', calculateTotal);
+</script>

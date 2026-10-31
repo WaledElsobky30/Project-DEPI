@@ -1,0 +1,174 @@
+﻿@* Views/Shared/_Footer.cshtml *@
+
+<!-- ضيف Font Awesome في الـ Layout مش هنا -->
+<!-- <link rel="stylesheet" ...>  -->
+<!-- Flaticon uIcons Brands -->
+<link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-brands/css/uicons-brands.css">
+
+<style>
+    .luxury-footer * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .luxury-footer {
+        background-color: #1a1a1a;
+        color: #fff;
+        padding: 60px 0 20px;
+        margin-top: auto;
+    }
+
+        .luxury-footer .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .luxury-footer .footer-section h2 {
+            color: #b8860b;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .luxury-footer .footer-section h3 {
+            margin-bottom: 20px;
+            font-size: 20px;
+            color: #fff;
+        }
+
+        .luxury-footer .footer-links ul {
+            list-style: none;
+        }
+
+        .luxury-footer .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .luxury-footer .footer-links a {
+            color: #ddd;
+            text-decoration: none;
+            transition: color 0.3s;
+            display: block;
+        }
+
+            .luxury-footer .footer-links a:hover {
+                color: #b8860b;
+                transform: translateX(5px);
+            }
+
+        .luxury-footer .contact-info p {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .luxury-footer .contact-info i {
+            margin-right: 10px;
+            color: #b8860b;
+            width: 20px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .luxury-footer .social-icons {
+            display: flex;
+            margin-top: 20px;
+            gap: 12px;
+        }
+
+            .luxury-footer .social-icons a {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 42px;
+                height: 42px;
+                background-color: #333;
+                color: white;
+                border-radius: 50%;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                font-size: 20px;
+            }
+
+                .luxury-footer .social-icons a:hover {
+                    background-color: #b8860b;
+                    transform: translateY(-3px);
+                }
+
+        .luxury-footer .copyright {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            color: #ddd;
+        }
+
+    @@media (max-width: 768px) {
+        .luxury-footer .footer-content
+
+    {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .luxury-footer .contact-info p {
+        justify-content: center;
+    }
+
+    .luxury-footer .social-icons {
+        justify-content: center;
+    }
+
+    }
+</style>
+
+
+<footer class="luxury-footer">
+    <div class="footer-content">
+
+        <!-- LEFT SECTION -->
+        <div class="footer-section">
+            <h2>Luxury Haven</h2>
+            <p>Experience unparalleled luxury and comfort at our premium hotel. Your perfect getaway awaits.</p>
+
+            <div class="social-icons">
+                <a href="https://facebook.com" target="_blank"><i class="fi fi-brands-facebook"></i></a>
+                <a href="https://twitter.com" target="_blank"><i class="fi fi-brands-twitter"></i></a>
+                <a href="https://linkedin.com" target="_blank"><i class="fi fi-brands-linkedin"></i></a>
+                <a href="https://whatsapp.com" target="_blank"><i class="fi fi-brands-whatsapp"></i></a>
+            </div>
+        </div>
+
+        <!-- QUICK LINKS -->
+        <div class="footer-section footer-links">
+            <h3>Quick Links</h3>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/about">About Us</a></li>
+                <li><a href="/rooms">Rooms</a></li>
+                <li><a href="/contact">Contact</a></li>
+            </ul>
+        </div>
+
+        <!-- CONTACT INFO -->
+        <div class="footer-section contact-info">
+            <h3>Contact Info</h3>
+            <p><i class="fi fi-brands-whatsapp"></i> +1 (555) 123-4567</p>
+            <p><i class="fi fi-brands-twitter"></i> info@luxuryhaven.com</p>
+            <p><i class="fi fi-brands-facebook"></i> 123 Luxury Avenue, City</p>
+        </div>
+
+    </div>
+
+    <div class="copyright">
+        <p>&copy; 2025 Luxury Haven. All rights reserved.</p>
+    </div>
+</footer>

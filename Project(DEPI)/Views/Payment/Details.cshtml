@@ -1,0 +1,712 @@
+﻿@model BookifyHotel.Model.Payment
+@{
+    ViewData["Title"] = "Payment Details";
+    Layout = "~/Views/Shared/_SideBarLayout.cshtml";
+}
+
+<body data-active-page="payments">
+    <div class="header">
+        <h2>Payment Details</h2>
+        <div class="user-info">
+            <div>
+                <h4>System Administrator</h4>
+                <p style="color: #b8860b;">Admin</p>
+            </div>
+            <img src="https://ui-avatars.com/api/?name=Admin&background=b8860b&color=fff" alt="User">
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <a href="@Url.Action("Index", "Payment")" class="back-btn">
+        <i class="fas fa-arrow-left"></i>
+        Back to Payments
+    </a>
+
+    <div class="details-container">
+        <!-- Payment Header -->
+        <div class="details-header">
+            <div class="header-content">
+                <div class="title-section">
+                    <h3>Payment #PMT@(Model.PaymentId.ToString("D4"))</h3>
+                    <span class="status @Model.PaymentStatus?.ToLower()">@Model.PaymentStatus</span>
+                </div>
+                <div class="amount-section">
+                    <div class="amount">$@Model.Amount.ToString("N2")</div>
+                    <div class="amount-label">Total Amount</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="details-grid">
+            <!-- Payment Information -->
+            <div class="details-card">
+                <div class="card-header">
+                    <i class="fas fa-credit-card"></i>
+                    <h4>Payment Information</h4>
+                </div>
+                <div class="card-content">
+                    <div class="detail-row">
+                        <div class="detail-label">Payment ID</div>
+                        <div class="detail-value">PMT@(Model.PaymentId.ToString("D4"))</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Amount</div>
+                        <div class="detail-value">$@Model.Amount.ToString("N2")</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Payment Method</div>
+                        <div class="detail-value">
+                            <span class="payment-method @Model.PaymentMethod?.ToLower()?.Replace(" ", "-")">
+                                <i class="fas @GetPaymentMethodIcon(Model.PaymentMethod)"></i>
+                                @Model.PaymentMethod
+                            </span>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Payment Date</div>
+                        <div class="detail-value">@Model.PaymentDate.ToString("MMM dd, yyyy 'at' hh:mm tt")</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Transaction Reference</div>
+                        <div class="detail-value">
+                            <code class="transaction-ref">@Model.TransactionRefrence</code>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Payment Status</div>
+                        <div class="detail-value">
+                            <span class="status @Model.PaymentStatus?.ToLower()">@Model.PaymentStatus</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Information -->
+            <div class="details-card">
+                <div class="card-header">
+                    <i class="fas fa-calendar-check"></i>
+                    <h4>Booking Information</h4>
+                </div>
+                <div class="card-content">
+                    <div class="detail-row">
+                        <div class="detail-label">Booking ID</div>
+                        <div class="detail-value">BK@(Model.BookingId.ToString("D4"))</div>
+                    </div>
+                    @if (Model.Booking != null)
+                    {
+                        <div class="detail-row">
+                            <div class="detail-label">Guest Name</div>
+                            <div class="detail-value">@Model.Booking.UserProfile?.FullName </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Guest Email</div>
+                            <div class="detail-value">@Model.Booking.UserProfile?.Email</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Room Number</div>
+                            <div class="detail-value">Room @Model.Booking.Room?.RoomNumber</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Room Type</div>
+                            <div class="detail-value">@Model.Booking.Room?.RoomTypes?.Name</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Check-in Date</div>
+                            <div class="detail-value">@Model.Booking.CheckInDate.ToString("MMM dd, yyyy")</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Check-out Date</div>
+                            <div class="detail-value">@Model.Booking.CheckOutDate.ToString("MMM dd, yyyy")</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Booking Status</div>
+                            <div class="detail-value">
+                                <span class="status @Model.Booking.Status?.ToLower()">@Model.Booking.Status</span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="detail-row">
+                            <div class="detail-value" style="color: #ccc;">Booking information not available</div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Transaction Timeline -->
+            <div class="details-card">
+                <div class="card-header">
+                    <i class="fas fa-history"></i>
+                    <h4>Transaction Timeline</h4>
+                </div>
+                <div class="card-content">
+                    <div class="timeline">
+                        <div class="timeline-item completed">
+                            <div class="timeline-marker">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">Payment Initiated</div>
+                                <div class="timeline-time">@Model.PaymentDate.AddMinutes(-5).ToString("MMM dd, yyyy 'at' hh:mm tt")</div>
+                            </div>
+                        </div>
+                        <div class="timeline-item @(Model.PaymentStatus == "Paid" || Model.PaymentStatus == "Failed" ? "completed" : "current")">
+                            <div class="timeline-marker">
+                                <i class="fas @(Model.PaymentStatus == "Paid" ? "fa-check" : Model.PaymentStatus == "Failed" ? "fa-times" : "fa-spinner")"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">
+                                    @(Model.PaymentStatus == "Paid" ? "Payment Completed" :
+                                                                        Model.PaymentStatus == "Failed" ? "Payment Failed" :
+                                                                        "Payment Processing")
+                                </div>
+                                <div class="timeline-time">@Model.PaymentDate.ToString("MMM dd, yyyy 'at' hh:mm tt")</div>
+                                @if (Model.PaymentStatus == "Failed")
+                                {
+                                    <div class="timeline-description" style="color: #ef4444;">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        Payment transaction failed. Please check payment details.
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        @if (Model.PaymentStatus == "Paid")
+                        {
+                            <div class="timeline-item completed">
+                                <div class="timeline-marker">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <div class="timeline-title">Confirmation Sent</div>
+                                    <div class="timeline-time">@Model.PaymentDate.AddMinutes(2).ToString("MMM dd, yyyy 'at' hh:mm tt")</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions Card -->
+            <div class="details-card">
+                <div class="card-header">
+                    <i class="fas fa-cog"></i>
+                    <h4>Actions</h4>
+                </div>
+                <div class="card-content">
+                    <div class="action-buttons-vertical">
+                        <button class="action-btn view-btn" onclick="location.href='@Url.Action("Details", "Booking", new { id = Model.BookingId })'">
+                            <i class="fas fa-calendar-check"></i>
+                            View Booking Details
+                        </button>
+                        <button class="action-btn info-btn" onclick="printPaymentDetails()">
+                            <i class="fas fa-print"></i>
+                            Print Receipt
+                        </button>
+                        <button class="action-btn info-btn" onclick="downloadReceipt()">
+                            <i class="fas fa-download"></i>
+                            Download Receipt
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Back Button */
+        .back-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            text-decoration: none;
+            width: fit-content;
+        }
+
+            .back-btn:hover {
+                background: rgba(184, 134, 11, 0.1);
+                border-color: var(--secondary);
+            }
+
+        /* Details Container */
+        .details-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        /* Details Header */
+        .details-header {
+            background: rgba(184, 134, 11, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .title-section h3 {
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .amount-section {
+            text-align: right;
+        }
+
+        .amount {
+            color: var(--secondary);
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .amount-label {
+            color: #ccc;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        /* Details Grid */
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            padding: 30px;
+        }
+
+        /* Details Card */
+        .details-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+            .card-header i {
+                color: var(--secondary);
+                font-size: 18px;
+            }
+
+            .card-header h4 {
+                color: white;
+                font-size: 16px;
+                font-weight: 600;
+                margin: 0;
+            }
+
+        .card-content {
+            padding: 20px;
+        }
+
+        /* Detail Rows */
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+            .detail-row:last-child {
+                border-bottom: none;
+            }
+
+        .detail-label {
+            color: #ccc;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        /* Status Styles */
+        .status {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+            .status.paid {
+                background: rgba(16, 185, 129, 0.2);
+                color: #10b981;
+                border: 1px solid rgba(16, 185, 129, 0.3);
+            }
+
+            .status.pending {
+                background: rgba(245, 158, 11, 0.2);
+                color: #f59e0b;
+                border: 1px solid rgba(245, 158, 11, 0.3);
+            }
+
+            .status.failed {
+                background: rgba(239, 68, 68, 0.2);
+                color: #ef4444;
+                border: 1px solid rgba(239, 68, 68, 0.3);
+            }
+
+            .status.confirmed {
+                background: rgba(59, 130, 246, 0.2);
+                color: #3b82f6;
+                border: 1px solid rgba(59, 130, 246, 0.3);
+            }
+
+        /* Payment Method */
+        .payment-method {
+            padding: 6px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+            .payment-method.credit-card {
+                background: rgba(59, 130, 246, 0.2);
+                color: #3b82f6;
+                border: 1px solid rgba(59, 130, 246, 0.3);
+            }
+
+            .payment-method.debit-card {
+                background: rgba(139, 92, 246, 0.2);
+                color: #8b5cf6;
+                border: 1px solid rgba(139, 92, 246, 0.3);
+            }
+
+            .payment-method.paypal {
+                background: rgba(59, 130, 246, 0.2);
+                color: #3b82f6;
+                border: 1px solid rgba(59, 130, 246, 0.3);
+            }
+
+            .payment-method.bank-transfer {
+                background: rgba(16, 185, 129, 0.2);
+                color: #10b981;
+                border: 1px solid rgba(16, 185, 129, 0.3);
+            }
+
+            .payment-method.cash {
+                background: rgba(107, 114, 128, 0.2);
+                color: #6b7280;
+                border: 1px solid rgba(107, 114, 128, 0.3);
+            }
+
+        /* Transaction Reference */
+        .transaction-ref {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #ccc;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 25px;
+        }
+
+            .timeline-item:last-child {
+                padding-bottom: 0;
+            }
+
+            .timeline-item::before {
+                content: '';
+                position: absolute;
+                left: -20px;
+                top: 0;
+                bottom: 0;
+                width: 2px;
+                background: rgba(255, 255, 255, 0.1);
+            }
+
+            .timeline-item:last-child::before {
+                display: none;
+            }
+
+        .timeline-marker {
+            position: absolute;
+            left: -30px;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        .timeline-item.completed .timeline-marker {
+            background: #10b981;
+            color: white;
+        }
+
+        .timeline-item.current .timeline-marker {
+            background: #f59e0b;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        .timeline-item.pending .timeline-marker {
+            background: #6b7280;
+            color: white;
+        }
+
+        .timeline-content {
+            margin-left: 0;
+        }
+
+        .timeline-title {
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .timeline-time {
+            color: #ccc;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .timeline-description {
+            color: #ccc;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        @@keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Action Buttons Vertical */
+        .action-buttons-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .action-btn {
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .view-btn {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+            .view-btn:hover {
+                background: rgba(16, 185, 129, 0.3);
+            }
+
+        .info-btn {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+            .info-btn:hover {
+                background: rgba(59, 130, 246, 0.3);
+            }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left;
+            }
+
+            .amount-section {
+                text-align: left;
+            }
+
+            .details-grid {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+
+            .detail-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+
+            .detail-value {
+                text-align: left;
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .details-header {
+                padding: 20px;
+            }
+
+            .card-content {
+                padding: 15px;
+            }
+
+            .amount {
+                font-size: 2rem;
+            }
+        }
+    </style>
+
+    <script>
+        // Print payment details
+        function printPaymentDetails() {
+            const printContent = `
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2 style="color: #333; border-bottom: 2px solid #b8860b; padding-bottom: 10px;">
+                        Payment Receipt - LuxuryHaven
+                    </h2>
+                    <div style="margin: 20px 0;">
+                        <h3 style="color: #b8860b;">Payment Information</h3>
+                        <p><strong>Payment ID:</strong> PMT@(Model.PaymentId.ToString("D4"))</p>
+                        <p><strong>Amount:</strong> $@Model.Amount.ToString("N2")</p>
+                        <p><strong>Payment Method:</strong> @Model.PaymentMethod</p>
+                        <p><strong>Payment Date:</strong> @Model.PaymentDate.ToString("MMM dd, yyyy 'at' hh:mm tt")</p>
+                        <p><strong>Transaction Reference:</strong> @Model.TransactionRefrence</p>
+                        <p><strong>Status:</strong> @Model.PaymentStatus</p>
+                    </div>
+                    <div style="margin: 20px 0;">
+                        <h3 style="color: #b8860b;">Booking Information</h3>
+                        <p><strong>Booking ID:</strong> BK@(Model.BookingId.ToString("D4"))</p>
+                        @if (Model.Booking != null)
+                        {
+                                    <p><strong>Guest:</strong> @Model.Booking.UserProfile?.FullName</p>
+                                <p><strong>Room:</strong> Room @Model.Booking.Room?.RoomNumber - @Model.Booking.Room?.RoomTypes?.Name</p>
+                        }
+                    </div>
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ccc;">
+                        <p style="color: #666; font-size: 12px;">
+                            Generated on @DateTime.Now.ToString("MMM dd, yyyy 'at' hh:mm tt")
+                        </p>
+                    </div>
+                </div>
+            `;
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Payment Receipt - PMT@(Model.PaymentId.ToString("D4"))</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 20px; }
+                            @@media print {
+                                body { margin: 0; }
+                            }
+                        </style>
+                    </head>
+                    <body>${printContent}</body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        // Download receipt
+        function downloadReceipt() {
+            alert('Receipt download functionality would be implemented here with server-side PDF generation.');
+        }
+
+        // Add loading animation for current status
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentItems = document.querySelectorAll('.timeline-item.current');
+            currentItems.forEach(item => {
+                const spinner = item.querySelector('.fa-spinner');
+                if (spinner) {
+                    spinner.style.animation = 'spin 1s linear infinite';
+                }
+            });
+        });
+    </script>
+</body>
+
+@functions {
+    public string GetPaymentMethodIcon(string method)
+    {
+        if (string.IsNullOrEmpty(method))
+            return "fa-credit-card";
+
+        return method.ToLower() switch
+        {
+            "credit card" => "fa-credit-card",
+            "debit card" => "fa-credit-card",
+            "paypal" => "fa-paypal",
+            "bank transfer" => "fa-university",
+            "cash" => "fa-money-bill",
+            _ => "fa-credit-card"
+        };
+    }
+}

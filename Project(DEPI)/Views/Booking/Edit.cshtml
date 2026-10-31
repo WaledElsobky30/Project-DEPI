@@ -1,0 +1,907 @@
+﻿@using BookifyHotel.Model
+@model Booking
+@{
+    ViewData["Title"] = "Edit Booking";
+    Layout = "~/Views/Shared/_SideBarLayout.cshtml";
+
+    var roomsData = ViewBag.RoomsData as Dictionary<string, dynamic> ?? new Dictionary<string, dynamic>();
+}
+
+<body data-active-page="bookings">
+    <div class="header">
+        <h2>Edit Booking</h2>
+        <div class="user-info">
+            <div>
+                <h4>System Administrator</h4>
+                <p style="color: #b8860b;">Admin</p>
+            </div>
+            <img src="https://ui-avatars.com/api/?name=Admin&background=b8860b&color=fff" alt="User">
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+        </div>
+    }
+
+    <!-- Back Button -->
+    <a href="@Url.Action("Index", "Booking")" class="back-btn">
+        <i class="fas fa-arrow-left"></i>
+        Back to Bookings
+    </a>
+
+    <div class="form-container">
+        <form asp-action="Edit" method="post" class="booking-form" id="editBookingForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="BookingId" />
+
+            <!-- Display validation summary -->
+            <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+            <!-- Booking Summary -->
+            <div class="summary-section">
+                <div class="summary-header">
+                    <div class="booking-title">
+                        <h1><i class="fas fa-calendar-edit"></i> Editing Booking #BK@(Model.BookingId.ToString("D4"))</h1>
+                        <div class="booking-meta">
+                            <span class="meta-item">
+                                <i class="fas fa-calendar"></i>
+                                Created: @Model.BookingDate.ToString("MMM dd, yyyy")
+                            </span>
+                            <span class="meta-item">
+                                <i class="fas fa-hashtag"></i>
+                                ID: BK@(Model.BookingId.ToString("D4"))
+                            </span>
+                        </div>
+                    </div>
+                    <div class="status-indicator">
+                        <span class="status-badge @Model.Status.ToLower()">
+                            <i class="fas fa-circle"></i>
+                            @Model.Status
+                        </span>
+                  
+                    </div>
+                </div>
+            </div>
+
+            <!-- Guest Information Section -->
+            <div class="form-section">
+                <h3><i class="fas fa-user"></i> Guest Information</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label asp-for="UserProfileId" class="form-label">Select Guest *</label>
+                        <select asp-for="UserProfileId" asp-items="@(ViewBag.Users ?? new SelectList(Enumerable.Empty<SelectListItem>()))"
+                                class="form-input" required>
+                            <option value="">-- Select Guest --</option>
+                        </select>
+                        <span asp-validation-for="UserProfileId" class="validation-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Current Guest</label>
+                        <input type="text" class="form-input" readonly
+                               value="@(Model.UserProfile?.FullName ?? "Not assigned")">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Room Information Section -->
+            <div class="form-section">
+                <h3><i class="fas fa-door-open"></i> Room Information</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label asp-for="RoomId" class="form-label">Select Room *</label>
+                        <select asp-for="RoomId" asp-items="@(ViewBag.Rooms ?? new SelectList(Enumerable.Empty<SelectListItem>()))"
+                                class="form-input" id="roomSelect" required>
+                            <option value="">-- Select Room --</option>
+                        </select>
+                        <span asp-validation-for="RoomId" class="validation-error"></span>
+                        <div class="field-info" id="roomAvailability"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Current Room</label>
+                        <input type="text" class="form-input" readonly
+                               value="@(Model.Room?.RoomNumber != null ? $"Room {Model.Room.RoomNumber}" : "Not assigned")">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Room Type & Price</label>
+                        <input type="text" class="form-input" id="roomDetails" readonly
+                               value="@(Model.Room?.RoomTypes != null ? $"{Model.Room.RoomTypes.Name} (${Model.Room.RoomTypes.PricePerNight:N2}/night)" : "Not available")">
+                        <input type="hidden" id="pricePerNightValue"
+                               value="@(Model.Room?.RoomTypes?.PricePerNight ?? 0)">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stay Details Section -->
+            <div class="form-section">
+                <h3><i class="fas fa-calendar-alt"></i> Stay Details</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label asp-for="CheckInDate" class="form-label">Check-in Date *</label>
+                        <input asp-for="CheckInDate" type="date" class="form-input" id="checkInDate"
+                               value="@Model.CheckInDate.ToString("yyyy-MM-dd")" required>
+                        <span asp-validation-for="CheckInDate" class="validation-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="CheckOutDate" class="form-label">Check-out Date *</label>
+                        <input asp-for="CheckOutDate" type="date" class="form-input" id="checkOutDate"
+                               value="@Model.CheckOutDate.ToString("yyyy-MM-dd")" required>
+                        <span asp-validation-for="CheckOutDate" class="validation-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Stay Duration</label>
+                        <input type="text" class="form-input" id="nightsCount" readonly
+                               value="@((Model.CheckOutDate - Model.CheckInDate).Days) nights">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Price Calculation Section -->
+            <div class="form-section">
+                <h3><i class="fas fa-calculator"></i> Price Calculation</h3>
+                <div class="price-calculation">
+                    <div class="calculation-row original">
+                        <div class="calculation-label">
+                            <i class="fas fa-history"></i>
+                            Original Total
+                        </div>
+                        <div class="calculation-value">$@Model.TotalPrice.ToString("N2")</div>
+                    </div>
+                    <div class="calculation-row">
+                        <div class="calculation-label">Current Price per Night:</div>
+                        <div class="calculation-value" id="calcPricePerNight">
+                            $@(Model.Room?.RoomTypes?.PricePerNight.ToString("N2") ?? "0.00")
+                        </div>
+                    </div>
+                    <div class="calculation-row">
+                        <div class="calculation-label">Number of Nights:</div>
+                        <div class="calculation-value" id="calcNights">
+                            @((Model.CheckOutDate - Model.CheckInDate).Days)
+                        </div>
+                    </div>
+                    <div class="calculation-row total">
+                        <div class="calculation-label">New Total Amount:</div>
+                        <div class="calculation-value" id="calcTotalPrice">$@Model.TotalPrice.ToString("N2")</div>
+                    </div>
+                </div>
+                <input type="hidden" asp-for="TotalPrice" id="totalPriceInput" value="@Model.TotalPrice" />
+                <div class="field-info">
+                    <i class="fas fa-sync-alt"></i>
+                    Total will update automatically when you change room or dates
+                </div>
+            </div>
+
+            <!-- Status Section -->
+            <div class="form-section">
+                <h3><i class="fas fa-info-circle"></i> Booking Status</h3>
+                <div class="status-warning" id="statusWarning" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <strong>Status Change Alert</strong>
+                        <p id="statusWarningText"></p>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label asp-for="Status" class="form-label">Update Status *</label>
+                        <select asp-for="Status" class="form-input" id="statusSelect" required>
+                            <option value="Pending">Pending</option>
+                            <option value="Confirmed">Confirmed</option>
+                            <option value="Cancelled">Cancelled</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                        <span asp-validation-for="Status" class="validation-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Current Status</label>
+                        <input type="text" class="form-input" readonly value="@Model.Status"
+                               style="text-transform: capitalize; background: rgba(255,255,255,0.03);">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="form-actions">
+                <button type="submit" class="action-btn save-btn" id="submitBtn">
+                    <i class="fas fa-save"></i>
+                    Update Booking
+                </button>
+                <a href="@Url.Action("Details", "Booking", new { id = Model.BookingId })" class="action-btn view-btn">
+                    <i class="fas fa-eye"></i>
+                    View Details
+                </a>
+                <a href="@Url.Action("Index", "Booking")" class="action-btn cancel-btn">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+                <button type="button" class="action-btn reset-btn" onclick="resetChanges()">
+                    <i class="fas fa-undo"></i>
+                    Reset Changes
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <style>
+        /* Back Button */
+        .back-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            text-decoration: none;
+            width: fit-content;
+        }
+
+            .back-btn:hover {
+                background: rgba(184, 134, 11, 0.1);
+                border-color: var(--secondary);
+            }
+
+        /* Alert Styles */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        /* Summary Section */
+        .summary-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 25px;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .booking-title h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .booking-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #ccc;
+            font-size: 13px;
+        }
+
+            .meta-item i {
+                color: var(--secondary);
+                font-size: 12px;
+            }
+
+        .status-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .status-badge.confirmed {
+                background: rgba(16, 185, 129, 0.2);
+                color: #10b981;
+                border: 1px solid rgba(16, 185, 129, 0.3);
+            }
+
+            .status-badge.pending {
+                background: rgba(245, 158, 11, 0.2);
+                color: #f59e0b;
+                border: 1px solid rgba(245, 158, 11, 0.3);
+            }
+
+            .status-badge.cancelled {
+                background: rgba(239, 68, 68, 0.2);
+                color: #ef4444;
+                border: 1px solid rgba(239, 68, 68, 0.3);
+            }
+
+            .status-badge.completed {
+                background: rgba(59, 130, 246, 0.2);
+                color: #3b82f6;
+                border: 1px solid rgba(59, 130, 246, 0.3);
+            }
+
+            .status-badge i {
+                font-size: 8px;
+            }
+
+        .status-note {
+            font-size: 11px;
+            color: #9ca3af;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+            .status-note i {
+                color: var(--secondary);
+            }
+
+        /* Form Container */
+        .form-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+            .form-section:last-child {
+                border-bottom: none;
+                margin-bottom: 0;
+            }
+
+            .form-section h3 {
+                color: white;
+                font-size: 18px;
+                font-weight: 600;
+                margin-bottom: 20px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+                .form-section h3 i {
+                    color: var(--secondary);
+                }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-input, select.form-input {
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+            font-size: 14px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+            .form-input:focus, select.form-input:focus {
+                outline: none;
+                border-color: var(--secondary);
+                background: rgba(255, 255, 255, 0.08);
+            }
+
+            .form-input:read-only {
+                background: rgba(255, 255, 255, 0.03);
+                color: #ccc;
+                cursor: not-allowed;
+            }
+
+        .validation-error {
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .validation-summary {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #ef4444;
+        }
+
+            .validation-summary ul {
+                margin: 0;
+                padding-left: 20px;
+            }
+
+        .field-info {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+            .field-info i {
+                color: var(--secondary);
+            }
+
+        /* Status Warning */
+        .status-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            color: #f59e0b;
+        }
+
+            .status-warning i {
+                color: #f59e0b;
+                font-size: 16px;
+                margin-top: 2px;
+            }
+
+            .status-warning strong {
+                display: block;
+                margin-bottom: 4px;
+            }
+
+            .status-warning p {
+                margin: 0;
+                font-size: 13px;
+            }
+
+        /* Price Calculation */
+        .price-calculation {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .calculation-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+            .calculation-row:last-child {
+                border-bottom: none;
+            }
+
+            .calculation-row.original {
+                background: rgba(255, 255, 255, 0.02);
+                padding: 12px 15px;
+                border-radius: 8px;
+                margin-bottom: 10px;
+            }
+
+                .calculation-row.original .calculation-label i {
+                    color: #9ca3af;
+                    margin-right: 8px;
+                }
+
+            .calculation-row.total {
+                border-top: 2px solid var(--secondary);
+                padding-top: 15px;
+                margin-top: 10px;
+            }
+
+        .calculation-label {
+            color: #ccc;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .calculation-value {
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .calculation-row.total .calculation-label {
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .calculation-row.total .calculation-value {
+            color: var(--secondary);
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        /* Form Actions */
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            color: white;
+        }
+
+            .save-btn:hover:not(.loading) {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(184, 134, 11, 0.4);
+            }
+
+        .view-btn {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+            .view-btn:hover {
+                background: rgba(16, 185, 129, 0.3);
+            }
+
+        .cancel-btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+            .cancel-btn:hover {
+                background: rgba(255, 255, 255, 0.1);
+            }
+
+        .reset-btn {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+            .reset-btn:hover {
+                background: rgba(245, 158, 11, 0.3);
+            }
+
+        /* Loading Button */
+        .save-btn.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+            .save-btn.loading i {
+                animation: spin 1s linear infinite;
+            }
+
+        @@keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .summary-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .status-indicator {
+                align-items: flex-start;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .booking-meta {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+
+    <script>
+        // بيانات الغرف من السيرفر
+        const roomsData = @Html.Raw(Json.Serialize(roomsData));
+        const originalStatus = '@Model.Status';
+        const originalRoomId = '@Model.RoomId';
+
+        // تحديث معلومات الغرفة عند الاختيار
+        document.getElementById('roomSelect').addEventListener('change', function() {
+            const roomId = this.value;
+            const roomData = roomsData[roomId];
+
+            if (roomData) {
+                document.getElementById('roomDetails').value =
+                    `${roomData.roomType} ($${roomData.pricePerNight.toFixed(2)}/night)`;
+                document.getElementById('pricePerNightValue').value = roomData.pricePerNight;
+                document.getElementById('calcPricePerNight').textContent =
+                    `$${roomData.pricePerNight.toFixed(2)}`;
+
+                // التحقق من توافر الغرفة إذا لم تكن الغرفة الأصلية
+                if (roomId !== originalRoomId && !roomData.isAvailable && roomData.isAvailable !== undefined) {
+                    document.getElementById('roomAvailability').innerHTML =
+                        '<i class="fas fa-exclamation-triangle"></i> Room is not available';
+                    document.getElementById('roomAvailability').style.color = '#ef4444';
+                } else {
+                    document.getElementById('roomAvailability').innerHTML =
+                        '<i class="fas fa-check-circle"></i> Room is available';
+                    document.getElementById('roomAvailability').style.color = '#10b981';
+                }
+            } else {
+                document.getElementById('roomDetails').value = 'Not available';
+                document.getElementById('pricePerNightValue').value = '0';
+                document.getElementById('calcPricePerNight').textContent = '$0.00';
+                document.getElementById('roomAvailability').innerHTML = '';
+            }
+
+            calculateTotalPrice();
+        });
+
+        // تحديث تحذير تغيير الحالة
+        document.getElementById('statusSelect').addEventListener('change', function() {
+            const newStatus = this.value;
+            const warningDiv = document.getElementById('statusWarning');
+            const warningText = document.getElementById('statusWarningText');
+
+            if (newStatus !== originalStatus) {
+                if (newStatus === 'Confirmed') {
+                    warningText.textContent = 'Confirming this booking will mark the room as unavailable.';
+                } else if (originalStatus === 'Confirmed' && newStatus !== 'Confirmed') {
+                    warningText.textContent = 'Changing from Confirmed status will make the room available again.';
+                } else if (newStatus === 'Cancelled') {
+                    warningText.textContent = 'Cancelling this booking will release the room and notify the guest.';
+                } else if (newStatus === 'Completed') {
+                    warningText.textContent = 'Marking as completed will finalize this booking and release the room.';
+                }
+                warningDiv.style.display = 'flex';
+            } else {
+                warningDiv.style.display = 'none';
+            }
+        });
+
+        // حساب إجمالي السعر
+        function calculateTotalPrice() {
+            const checkInDate = new Date(document.getElementById('checkInDate').value);
+            const checkOutDate = new Date(document.getElementById('checkOutDate').value);
+            const pricePerNight = parseFloat(document.getElementById('pricePerNightValue').value) || 0;
+
+            if (checkInDate && checkOutDate && checkOutDate > checkInDate) {
+                const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+                const totalPrice = nights * pricePerNight;
+
+                document.getElementById('nightsCount').value = nights + ' nights';
+                document.getElementById('calcNights').textContent = nights;
+                document.getElementById('calcTotalPrice').textContent = '$' + totalPrice.toFixed(2);
+                document.getElementById('totalPriceInput').value = totalPrice;
+            } else {
+                const originalNights = @((Model.CheckOutDate - Model.CheckInDate).Days);
+                document.getElementById('nightsCount').value = originalNights + ' nights';
+                document.getElementById('calcNights').textContent = originalNights;
+                document.getElementById('calcTotalPrice').textContent = '$@Model.TotalPrice.ToString("N2")';
+                document.getElementById('totalPriceInput').value = '@Model.TotalPrice';
+            }
+        }
+
+        // تحديث الحد الأدنى للتواريخ
+        document.getElementById('checkInDate').addEventListener('change', function() {
+            const checkInDate = this.value;
+            document.getElementById('checkOutDate').min = checkInDate;
+
+            // إذا كان تاريخ check-out أقل من check-in، أعد ضبطه
+            const checkOutDate = document.getElementById('checkOutDate').value;
+            if (checkOutDate && checkOutDate < checkInDate) {
+                document.getElementById('checkOutDate').value = checkInDate;
+            }
+
+            calculateTotalPrice();
+        });
+
+        document.getElementById('checkOutDate').addEventListener('change', calculateTotalPrice);
+
+        // إعادة تعيين التغييرات
+        function resetChanges() {
+            if (confirm('Are you sure you want to reset all changes to original values?')) {
+                // إعادة تعيين الحقول
+                document.getElementById('UserProfileId').value = '@Model.UserProfileId';
+                document.getElementById('roomSelect').value = '@Model.RoomId';
+                document.getElementById('checkInDate').value = '@Model.CheckInDate.ToString("yyyy-MM-dd")';
+                document.getElementById('checkOutDate').value = '@Model.CheckOutDate.ToString("yyyy-MM-dd")';
+                document.getElementById('statusSelect').value = '@Model.Status';
+
+                // إعادة تعيين معلومات الغرفة
+                const roomData = roomsData['@Model.RoomId'];
+                if (roomData) {
+                    document.getElementById('roomDetails').value =
+                        `${roomData.roomType} ($${roomData.pricePerNight.toFixed(2)}/night)`;
+                    document.getElementById('pricePerNightValue').value = roomData.pricePerNight;
+                    document.getElementById('calcPricePerNight').textContent =
+                        `$${roomData.pricePerNight.toFixed(2)}`;
+                }
+
+                // إعادة تعيين الحسابات
+                calculateTotalPrice();
+
+                // إخفاء التحذيرات
+                document.getElementById('statusWarning').style.display = 'none';
+                document.getElementById('roomAvailability').innerHTML = '';
+
+                alert('All changes have been reset to original values.');
+            }
+        }
+
+        // تحقق من النموذج عند الإرسال
+        document.getElementById('editBookingForm').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('submitBtn');
+            const roomId = document.getElementById('roomSelect').value;
+            const userId = document.getElementById('UserProfileId').value;
+            const checkInDate = document.getElementById('checkInDate').value;
+            const checkOutDate = document.getElementById('checkOutDate').value;
+            const status = document.getElementById('statusSelect').value;
+            const roomData = roomsData[roomId];
+
+            // التحقق من الحقول المطلوبة
+            if (!roomId || !userId || !checkInDate || !checkOutDate || !status) {
+                e.preventDefault();
+                alert('Please fill in all required fields.');
+                return;
+            }
+
+            // التحقق من صحة التواريخ
+            if (new Date(checkOutDate) <= new Date(checkInDate)) {
+                e.preventDefault();
+                alert('Check-out date must be after check-in date.');
+                return;
+            }
+
+            // التحقق من توافر الغرفة إذا لم تكن الغرفة الأصلية
+            if (roomId !== originalRoomId && roomData && !roomData.isAvailable && roomData.isAvailable !== undefined) {
+                if (!confirm('Selected room is marked as not available. Continue anyway?')) {
+                    e.preventDefault();
+                    return;
+                }
+            }
+
+            // تأكيدات تغيير الحالة
+            if (status !== originalStatus) {
+                if (status === 'Cancelled') {
+                    if (!confirm('Cancel this booking? The room will be released and guest notified.')) {
+                        e.preventDefault();
+                        return;
+                    }
+                } else if (status === 'Confirmed' && originalStatus !== 'Confirmed') {
+                    if (!confirm('Confirm this booking? The room will be marked as unavailable.')) {
+                        e.preventDefault();
+                        return;
+                    }
+                } else if (originalStatus === 'Confirmed' && status !== 'Confirmed') {
+                    if (!confirm('Change from Confirmed status? The room will become available again.')) {
+                        e.preventDefault();
+                        return;
+                    }
+                }
+            }
+
+            // عرض حالة التحميل
+            submitBtn.classList.add('loading');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating Booking...';
+            submitBtn.disabled = true;
+        });
+
+        // تهيئة عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            // تعيين الحد الأدنى لتاريخ check-in إلى اليوم
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('checkInDate').min = today;
+
+            // تعيين الحد الأدنى لـ check-out إلى check-in
+            const checkInDate = document.getElementById('checkInDate').value;
+            document.getElementById('checkOutDate').min = checkInDate;
+
+            // تحميل بيانات الغرفة الحالية
+            const roomSelect = document.getElementById('roomSelect');
+            if (roomSelect.value) {
+                const event = new Event('change');
+                roomSelect.dispatchEvent(event);
+            }
+        });
+    </script>
+</body>

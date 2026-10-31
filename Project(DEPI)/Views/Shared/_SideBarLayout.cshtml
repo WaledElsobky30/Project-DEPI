@@ -1,0 +1,304 @@
+﻿<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] - LuxuryHaven</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #1a1a1a;
+            --secondary: #b8860b;
+            --accent: #d4af37;
+            --light: #f8f8f8;
+            --dark: #0a0a0a;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray: #6b7280;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: white;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: var(--primary);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            border-right: 1px solid rgba(184, 134, 11, 0.2);
+        }
+
+        .logo {
+            padding: 25px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(184, 134, 11, 0.3);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+            .logo h1 {
+                font-size: 28px;
+                font-weight: 300;
+                background: linear-gradient(45deg, #b8860b, #ffd700);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+        .nav-links {
+            padding: 20px 0;
+        }
+
+            .nav-links li {
+                list-style: none;
+                padding: 15px 25px;
+                transition: all 0.3s;
+                border-left: 3px solid transparent;
+            }
+
+                .nav-links li:hover {
+                    background: rgba(184, 134, 11, 0.1);
+                }
+
+                .nav-links li.active {
+                    background: rgba(184, 134, 11, 0.2);
+                    border-left: 3px solid var(--secondary);
+                }
+
+            .nav-links a {
+                color: white;
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                font-weight: 500;
+            }
+
+            .nav-links i {
+                font-size: 18px;
+                width: 25px;
+                color: var(--secondary);
+            }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 30px;
+            transition: all 0.3s;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+            .header h2 {
+                color: white;
+                font-weight: 300;
+                font-size: 2rem;
+                background: linear-gradient(45deg, #b8860b, #ffd700);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+            .user-info img {
+                width: 45px;
+                height: 45px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 2px solid var(--secondary);
+            }
+
+        /* Back Button */
+        .back-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            text-decoration: none;
+            width: fit-content;
+        }
+
+            .back-btn:hover {
+                background: rgba(184, 134, 11, 0.1);
+                border-color: var(--secondary);
+            }
+
+        /* Responsive */
+        @@media (max-width: 1200px) {
+            .sidebar {
+                width: 80px;
+            }
+
+                .sidebar .logo h1, .sidebar .nav-links span {
+                    display: none;
+                }
+
+                .sidebar .nav-links li {
+                    text-align: center;
+                    padding: 18px 10px;
+                }
+
+                    .sidebar .nav-links li i {
+                        font-size: 22px;
+                        width: auto;
+                    }
+
+            .main-content {
+                margin-left: 80px;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .main-content {
+                padding: 20px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <h1>LuxuryHaven</h1>
+        </div>
+        <ul class="nav-links">
+            <li>
+                <a href="/Dashboard/Index">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="/Room/Index2">
+                    <i class="fas fa-door-open"></i>
+                    <span>Rooms</span>
+                </a>
+            </li>
+            <li>
+                <a href="/RoomType/Index">
+                    <i class="fas fa-bed"></i>
+                    <span>Room Types</span>
+                </a>
+            </li>
+            <li>
+                <a href="/Booking/Index">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Bookings</span>
+                </a>
+            </li>
+            <li>
+                <a href="/Payment/Index"> 
+                    <i class="fas fa-credit-card"></i>
+                    <span>Payments</span>
+                </a>
+            </li>
+            <li>
+                <a href="/User/Index">
+                    <i class="fas fa-users"></i>
+                    <span>Users</span>
+                </a>
+            </li>
+            @* <li>
+                <a href="#">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Reports</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </li> *@
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        @RenderBody()
+    </div>
+
+    <script>
+        // Set active navigation item based on current page
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentUrl = window.location.pathname.toLowerCase();
+            const navLinks = document.querySelectorAll('.nav-links a');
+
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href').toLowerCase();
+
+                // Check if current URL matches the link's href
+                if (currentUrl === href ||
+                    currentUrl.startsWith(href) && href !== '/') {
+                    link.parentElement.classList.add('active');
+                }
+
+                // Special case for dashboard
+                if (currentUrl === '/' && href.includes('dashboard')) {
+                    link.parentElement.classList.add('active');
+                }
+            });
+
+            // Add click event to nav items
+            document.querySelectorAll('.nav-links li').forEach(item => {
+                item.addEventListener('click', function() {
+                    document.querySelectorAll('.nav-links li').forEach(li => {
+                        li.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                });
+            });
+        });
+    </script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

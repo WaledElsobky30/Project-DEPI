@@ -1,0 +1,343 @@
+﻿@model IEnumerable<BookifyHotel.Model.RoomType>
+
+@{
+    ViewData["Title"] = "Room Types Management";
+    Layout = "~/Views/Shared/_SideBarLayout.cshtml";
+}
+
+<div class="roomtypes-index-page" data-active-page="roomtypes">
+
+    <div class="header">
+        <h2>Room Types Management</h2>
+        <div class="user-info">
+            <div>
+                <h4>System Administrator</h4>
+                <p style="color: #b8860b;">Admin Panel</p>
+            </div>
+            <img src="https://ui-avatars.com/api/?name=Admin&background=b8860b&color=fff" alt="User">
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+        </div>
+    }
+
+    <div class="page-actions">
+        <div class="search-box">
+            <input type="text" placeholder="Search room types..." id="searchInput">
+            <i class="fas fa-search"></i>
+        </div>
+        <button class="add-btn" onclick="location.href='@Url.Action("Create", "RoomType")'">
+            <i class="fas fa-plus"></i> Add New Room Type
+        </button>
+    </div>
+
+    <div class="table-container">
+        <div class="table-header">
+            <h3>All Room Types</h3>
+            <span class="total-items">Total: @(Model?.Count() ?? 0) Room Types</span>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>NAME</th>
+                        <th>PRICE PER NIGHT</th>
+                        <th>ROOMS COUNT</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var roomType in Model)
+                    {
+                        <tr>
+                            <td><strong>#@roomType.RoomTypeId</strong></td>
+                            <td>
+                                <div class="type-name">
+                                    <i class="fas fa-bed" style="color: #b8860b; margin-right: 8px;"></i>
+                                    <strong>@roomType.Name</strong>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="price">
+                                    <strong>$@roomType.PricePerNight.ToString("N2")</strong>
+                                    <div style="font-size: 11px; color: #999;">per night</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="rooms-count">
+                                    <strong>@(roomType.Rooms?.Count ?? 0)</strong>
+                                    <div style="font-size: 11px; color: #999;">rooms linked</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a href="@Url.Action("Edit", "RoomType", new { id = roomType.RoomTypeId })" class="action-btn edit-btn">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <a href="@Url.Action("Delete", "RoomType", new { id = roomType.RoomTypeId })" class="action-btn delete-btn"
+                                       onclick="return confirmDelete(@roomType.RoomTypeId, '@roomType.Name')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-bed empty-icon"></i>
+                <h3>No Room Types Found</h3>
+                <p>No room types have been added yet. Start by adding a new room type.</p>
+                <button class="add-btn" onclick="location.href='@Url.Action("Create", "RoomType")'" style="margin-top: 20px;">
+                    <i class="fas fa-plus"></i> Add First Room Type
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    /* CSS Styles (نفس الستايل بتاعك بالظبط مع تعديلات طفيفة) */
+    .alert {
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        backdrop-filter: blur(10px);
+    }
+
+    .alert-success {
+        background: rgba(16, 185, 129, 0.2);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        color: #10b981;
+    }
+
+    .alert-danger {
+        background: rgba(239, 68, 68, 0.2);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #ef4444;
+    }
+
+    .page-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .search-box {
+        position: relative;
+        width: 300px;
+    }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 20px 12px 45px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+            .search-box input:focus {
+                outline: none;
+                border-color: #b8860b;
+            }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #b8860b;
+        }
+
+    .add-btn {
+        background: linear-gradient(135deg, #b8860b, #d4af37);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: 0.3s;
+    }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(184, 134, 11, 0.4);
+        }
+
+    .table-container {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 25px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+        .table-header h3 {
+            color: white;
+            font-size: 20px;
+            margin: 0;
+        }
+
+    .total-items {
+        color: #b8860b;
+        font-weight: 600;
+        background: rgba(184, 134, 11, 0.1);
+        padding: 5px 15px;
+        border-radius: 15px;
+        border: 1px solid rgba(184, 134, 11, 0.2);
+        font-size: 12px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        text-align: left;
+        padding: 15px 20px;
+        color: #b8860b;
+        background: rgba(0, 0, 0, 0.2);
+        font-weight: 600;
+        font-size: 13px;
+    }
+
+    td {
+        padding: 15px 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        color: #ddd;
+        vertical-align: middle;
+    }
+
+    tr:hover {
+        background: rgba(184, 134, 11, 0.05);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
+
+    .action-btn {
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        transition: 0.3s;
+    }
+
+    .edit-btn {
+        background: rgba(59, 130, 246, 0.2);
+        color: #3b82f6;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+        .edit-btn:hover {
+            background: rgba(59, 130, 246, 0.3);
+        }
+
+    .delete-btn {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+        .delete-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 0;
+        color: #ccc;
+    }
+
+    .empty-icon {
+        font-size: 48px;
+        color: #b8860b;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    @@media (max-width: 768px) {
+        .page-actions {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .search-box {
+            width: 100%;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            min-width: 600px;
+        }
+    }
+</style>
+
+<script>
+    function confirmDelete(id, name) {
+        if (confirm(`Are you sure you want to delete "${name}"? This will delete all rooms associated with this type!`)) {
+            // 👇 رابط الحذف الصحيح
+            window.location.href = '@Url.Action("Delete", "RoomType")' + '?id=' + id;
+        }
+        return false;
+    }
+
+    // Search Script
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        const value = this.value.toLowerCase();
+        const rows = document.querySelectorAll('tbody tr');
+
+        rows.forEach(row => {
+            const name = row.querySelector('.type-name').textContent.toLowerCase();
+            const price = row.querySelector('.price strong').textContent.toLowerCase();
+
+            if (name.includes(value) || price.includes(value)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+</script>

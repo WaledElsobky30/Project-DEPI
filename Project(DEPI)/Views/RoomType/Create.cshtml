@@ -1,0 +1,301 @@
+﻿@model BookifyHotel.Model.RoomType
+@{
+    ViewData["Title"] = "Create New Room Type";
+    Layout = "~/Views/Shared/_SideBarLayout.cshtml";
+}
+
+<div class="create-roomtype-page" data-active-page="roomtypes">
+
+    <div class="header">
+        <h2>Create New Room Type</h2>
+        <div class="user-info">
+            <div>
+                <h4>System Administrator</h4>
+                <p style="color: #b8860b;">Admin Panel</p>
+            </div>
+            <img src="https://ui-avatars.com/api/?name=Admin&background=b8860b&color=fff" alt="User">
+        </div>
+    </div>
+
+    <a href="@Url.Action("Index", "RoomType")" class="back-btn">
+        <i class="fas fa-arrow-left"></i>
+        Back to Room Types
+    </a>
+
+    <div class="form-container">
+        <div class="form-header">
+            <h3>Add New Room Type</h3>
+            <p>Define a new room type with its specifications and pricing</p>
+        </div>
+
+        <form asp-action="CreateSave" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                <label class="form-label" asp-for="Name">Room Type Name *</label>
+                <input type="text" class="form-control" asp-for="Name" placeholder="e.g., Deluxe Suite, Standard Room">
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" asp-for="PricePerNight">Price Per Night ($) *</label>
+                <input type="number" step="0.01" class="form-control" asp-for="PricePerNight" placeholder="0.00">
+                <span asp-validation-for="PricePerNight" class="text-danger"></span>
+            </div>
+
+            <div class="features-section">
+                <h4>Included Amenities</h4>
+                <div class="features-grid">
+                    <div class="feature-checkbox">
+                        <input type="checkbox" id="wifi" name="features" value="wifi" checked disabled>
+                        <label for="wifi"><i class="fas fa-wifi"></i> Free WiFi</label>
+                    </div>
+                    <div class="feature-checkbox">
+                        <input type="checkbox" id="breakfast" name="features" value="breakfast" disabled>
+                        <label for="breakfast"><i class="fas fa-utensils"></i> Breakfast</label>
+                    </div>
+                    <div class="feature-checkbox">
+                        <input type="checkbox" id="ac" name="features" value="ac" checked disabled>
+                        <label for="ac"><i class="fas fa-snowflake"></i> A/C</label>
+                    </div>
+                    <div class="feature-checkbox">
+                        <input type="checkbox" id="tv" name="features" value="tv" checked disabled>
+                        <label for="tv"><i class="fas fa-tv"></i> Smart TV</label>
+                    </div>
+                </div>
+                <small class="text-muted" style="font-size: 11px; display: block; margin-top: 10px;">
+                    * Amenities are standard for all rooms currently.
+                </small>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-plus-circle"></i> Create Room Type
+                </button>
+                <a href="@Url.Action("Index", "RoomType")" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .back-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+        text-decoration: none;
+        width: fit-content;
+    }
+
+        .back-btn:hover {
+            background: rgba(184, 134, 11, 0.1);
+            border-color: #b8860b;
+        }
+
+    .form-container {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 30px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+        .form-header h3 {
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .form-header p {
+            color: #ccc;
+            font-size: 16px;
+        }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        color: white;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        color: white;
+        font-size: 14px;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s;
+        font-family: inherit;
+    }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #b8860b;
+            box-shadow: 0 0 0 2px rgba(184, 134, 11, 0.2);
+        }
+
+        .form-control::placeholder {
+            color: #666;
+        }
+
+    .features-section {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 25px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+        .features-section h4 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+    }
+
+    .feature-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s;
+    }
+
+        .feature-checkbox label {
+            color: #ccc;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+        }
+
+            .feature-checkbox label i {
+                color: #b8860b;
+            }
+
+    .text-danger {
+        color: #ef4444;
+        font-size: 12px;
+        margin-top: 5px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-decoration: none;
+        flex: 1;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #b8860b, #d4af37);
+        color: white;
+    }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(184, 134, 11, 0.4);
+        }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+    input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
+
+    @@media (max-width: 768px) {
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .form-container {
+            padding: 20px;
+        }
+
+        .features-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const priceInput = document.querySelector('input[name="PricePerNight"]');
+            if (priceInput) {
+                priceInput.addEventListener('blur', function() {
+                    if (this.value) { this.value = parseFloat(this.value).toFixed(2); }
+                });
+            }
+        });
+    </script>
+}

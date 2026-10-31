@@ -1,0 +1,815 @@
+﻿@using DAL.ViewModel
+@model CreateUserViewModel
+
+@{
+    ViewData["Title"] = "Create New User";
+    Layout = "~/Views/Shared/_SideBarLayout.cshtml";
+}
+
+<div class="user-create-page">
+
+    <div class="header">
+        <h2>Create New User</h2>
+        <div class="user-info">
+            <div>
+                <h4>System Administrator</h4>
+                <p style="color: #b8860b;">Admin Panel</p>
+            </div>
+            <img src="https://ui-avatars.com/api/?name=Admin&background=b8860b&color=fff" alt="User">
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+        </div>
+    }
+
+    <a href="@Url.Action("Index", "User")" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Users
+    </a>
+
+    <div class="form-container">
+        <form asp-action="Create" method="post" class="user-form" id="createUserForm">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+            <div class="form-header">
+                <h3><i class="fas fa-user-plus"></i> Add New User</h3>
+                <p class="form-subtitle">Fill in the user's information below. All fields marked with * are required.</p>
+                <p class="form-note">
+                    <i class="fas fa-info-circle"></i>
+                    User will be added to both: <strong>System Users</strong> and <strong>Profiles</strong>
+                </p>
+            </div>
+
+            <div class="form-section">
+                <h3><i class="fas fa-user-circle"></i> Personal Information</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label asp-for="FullName" class="form-label">Full Name *</label>
+                        <input asp-for="FullName" type="text" class="form-input" placeholder="Enter Full Name" required>
+                        <span asp-validation-for="FullName" class="validation-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Email" class="form-label">Email Address *</label>
+                        <input asp-for="Email" type="email" class="form-input" placeholder="Enter email address" required>
+                        <span asp-validation-for="Email" class="validation-error"></span>
+                        <div class="field-info" id="emailAvailability">
+                            <i class="fas fa-sync fa-spin" style="display: none;"></i>
+                            <span id="emailStatus"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
+                        <input asp-for="PhoneNumber" type="tel" class="form-input" placeholder="Enter phone number">
+                        <span asp-validation-for="PhoneNumber" class="validation-error"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3><i class="fas fa-lock"></i> Security Information</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label asp-for="Password" class="form-label">Password *</label>
+                        <input asp-for="Password" type="password" class="form-input" id="password"
+                               placeholder="Enter password" required>
+                        <span asp-validation-for="Password" class="validation-error"></span>
+                        <div class="password-strength">
+                            <div class="strength-bar"></div>
+                            <span class="strength-text">Password strength</span>
+                        </div>
+                        <div class="password-requirements">
+                            <div class="requirement" id="lengthReq">• At least 8 characters</div>
+                            <div class="requirement" id="uppercaseReq">• One uppercase letter</div>
+                            <div class="requirement" id="numberReq">• One number</div>
+                            <div class="requirement" id="specialReq">• One special character</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="ConfirmPassword" class="form-label">Confirm Password *</label>
+                        <input asp-for="ConfirmPassword" type="password" class="form-input"
+                               id="confirmPassword" placeholder="Confirm password" required>
+                        <span asp-validation-for="ConfirmPassword" class="validation-error"></span>
+                        <div id="passwordMatchError" style="display:none; color: #ef4444; font-size: 12px; margin-top: 5px;">
+                            Passwords do not match.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3><i class="fas fa-user-tag"></i> User Role *</h3>
+                <div class="role-selection">
+                    <div class="role-options">
+                        <label class="role-option">
+                            <input type="radio" asp-for="UserRole" value="User" checked>
+                            <div class="role-card">
+                                <div class="role-icon user-role">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="role-info">
+                                    <h4>Regular User</h4>
+                                    <p>Can make bookings and manage reservations</p>
+                                    <div class="role-permissions">
+                                        <span class="permission-tag">View Rooms</span>
+                                        <span class="permission-tag">Make Bookings</span>
+                                        <span class="permission-tag">Manage Profile</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                        <label class="role-option">
+                            <input type="radio" asp-for="UserRole" value="Admin">
+                            <div class="role-card">
+                                <div class="role-icon admin-role">
+                                    <i class="fas fa-crown"></i>
+                                </div>
+                                <div class="role-info">
+                                    <h4>Administrator</h4>
+                                    <p>Full access to system management</p>
+                                    <div class="role-permissions">
+                                        <span class="permission-tag">All Permissions</span>
+                                        <span class="permission-tag">Manage Users</span>
+                                        <span class="permission-tag">System Settings</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <div class="role-warning" id="adminWarning" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Warning: Admin users have full system access. Assign this role carefully.</span>
+                </div>
+                <span asp-validation-for="UserRole" class="validation-error"></span>
+            </div>
+
+            <div class="form-section">
+                <h3><i class="fas fa-eye"></i> User Preview</h3>
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <div class="preview-avatar">
+                            <img src="https://ui-avatars.com/api/?name=New+User&background=b8860b&color=fff&size=80"
+                                 alt="Preview" id="previewAvatar">
+                        </div>
+                        <div class="preview-info">
+                            <h4 id="previewName">New User</h4>
+                            <p id="previewEmail">email@example.com</p>
+                            <p class="preview-phone" id="previewPhone">No phone number</p>
+                            <span class="preview-role user-role-badge" id="previewRole">
+                                <i class="fas fa-user"></i> User
+                            </span>
+                        </div>
+                    </div>
+                    <div class="preview-details">
+                        <div class="detail-item">
+                            <label><i class="fas fa-database"></i> Tables:</label>
+                            <span id="previewTables">AspNetUsers & UserProfiles</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Role Access:</label>
+                            <span id="previewAccess">Booking Management, Profile Settings</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Status:</label>
+                            <span class="status new">New User - Ready to Create</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="action-btn create-btn" id="submitBtn">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Create User</span>
+                </button>
+                <a href="@Url.Action("Index", "User")" class="action-btn cancel-btn">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="button" class="action-btn clear-btn" onclick="clearForm()">
+                    <i class="fas fa-broom"></i> Clear Form
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* CSS Styles - نفس الستايل الخاص بيك تماماً */
+    .validation-summary {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        color: #ef4444;
+    }
+
+        .validation-summary ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+    .form-note {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 8px;
+        padding: 12px 15px;
+        margin-top: 10px;
+        color: #3b82f6;
+        font-size: 14px;
+    }
+
+        .form-note i {
+            color: #3b82f6;
+            margin-right: 8px;
+        }
+
+    .preview-phone {
+        color: #9ca3af;
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+
+    .create-btn.loading {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+        .create-btn.loading i {
+            animation: spin 1s linear infinite;
+        }
+
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .back-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+        text-decoration: none;
+        width: fit-content;
+    }
+
+        .back-btn:hover {
+            background: rgba(184, 134, 11, 0.1);
+            border-color: #b8860b;
+        }
+
+    .alert {
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        backdrop-filter: blur(10px);
+    }
+
+    .alert-success {
+        background: rgba(16, 185, 129, 0.2);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        color: #10b981;
+    }
+
+    .alert-danger {
+        background: rgba(239, 68, 68, 0.2);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #ef4444;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+        .form-header h3 {
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .form-header .form-subtitle {
+            color: #ccc;
+            font-size: 14px;
+        }
+
+    .form-container {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 30px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        margin-bottom: 30px;
+    }
+
+    .form-section {
+        margin-bottom: 30px;
+        padding-bottom: 25px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+        .form-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .form-section h3 {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+            .form-section h3 i {
+                color: #b8860b;
+            }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .form-label {
+        color: white;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .form-input {
+        padding: 12px 15px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        color: white;
+        font-size: 14px;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s;
+    }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #b8860b;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+    .validation-error {
+        color: #ef4444;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    .field-info {
+        font-size: 11px;
+        margin-top: 4px;
+    }
+
+    .password-strength {
+        margin-top: 8px;
+    }
+
+    .strength-bar {
+        height: 4px;
+        background: #374151;
+        border-radius: 2px;
+        margin-bottom: 4px;
+        transition: all 0.3s;
+        width: 0%;
+    }
+
+    .strength-text {
+        font-size: 11px;
+        color: #9ca3af;
+    }
+
+    .password-requirements {
+        margin-top: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .requirement {
+        font-size: 11px;
+        color: #9ca3af;
+        transition: all 0.3s;
+    }
+
+        .requirement.met {
+            color: #10b981;
+        }
+
+    .role-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+
+    .role-option {
+        cursor: pointer;
+    }
+
+        .role-option input {
+            display: none;
+        }
+
+            .role-option input:checked + .role-card {
+                border-color: #b8860b;
+                background: rgba(184, 134, 11, 0.1);
+            }
+
+    .role-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+        .role-card:hover {
+            border-color: rgba(184, 134, 11, 0.3);
+        }
+
+    .role-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: white;
+    }
+
+    .user-role {
+        background: linear-gradient(135deg, #3b82f6, #60a5fa);
+    }
+
+    .admin-role {
+        background: linear-gradient(135deg, #ef4444, #f87171);
+    }
+
+    .role-info h4 {
+        color: white;
+        font-size: 14px;
+        margin-bottom: 4px;
+    }
+
+    .role-info p {
+        color: #ccc;
+        font-size: 11px;
+        margin: 0;
+    }
+
+    .role-permissions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-top: 8px;
+    }
+
+    .permission-tag {
+        background: rgba(255, 255, 255, 0.1);
+        color: #ccc;
+        padding: 2px 6px;
+        border-radius: 8px;
+        font-size: 9px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .role-warning {
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        border-radius: 8px;
+        padding: 12px 15px;
+        margin-top: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #f59e0b;
+        font-size: 13px;
+    }
+
+        .role-warning i {
+            color: #f59e0b;
+        }
+
+    .preview-card {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 15px;
+        padding: 25px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .preview-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .preview-avatar img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #b8860b;
+    }
+
+    .preview-info h4 {
+        color: white;
+        font-size: 18px;
+        margin-bottom: 5px;
+    }
+
+    .preview-info p {
+        color: #ccc;
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .preview-role {
+        padding: 6px 12px;
+        border-radius: 15px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .user-role-badge {
+        background: rgba(59, 130, 246, 0.2);
+        color: #3b82f6;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .admin-role-badge {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .preview-details {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 15px;
+        margin-top: 15px;
+    }
+
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+        .detail-item label {
+            color: #ccc;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .detail-item span {
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+    .status {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+        .status.new {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .action-btn {
+        flex: 1;
+        padding: 15px 25px;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .create-btn {
+        background: linear-gradient(135deg, #b8860b, #d4af37);
+        color: white;
+    }
+
+        .create-btn:hover:not(.loading) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(184, 134, 11, 0.4);
+        }
+
+    .cancel-btn {
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+        .cancel-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+    .clear-btn {
+        background: rgba(245, 158, 11, 0.2);
+        color: #f59e0b;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+        .clear-btn:hover {
+            background: rgba(245, 158, 11, 0.3);
+        }
+
+    @@media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .role-options {
+            grid-template-columns: 1fr;
+        }
+
+        .preview-header {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+</style>
+
+<script>
+    function updatePreview() {
+        const fullName = document.getElementById('FullName')?.value || 'New User';
+        const email = document.getElementById('Email')?.value || 'email@example.com';
+        const phone = document.getElementById('PhoneNumber')?.value || 'No phone number';
+        const roleElement = document.querySelector('input[name="UserRole"]:checked');
+        const role = roleElement ? roleElement.value : 'User';
+
+        document.getElementById('previewAvatar').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(fullName) + '&background=b8860b&color=fff&size=80';
+        document.getElementById('previewName').textContent = fullName;
+        document.getElementById('previewEmail').textContent = email;
+        document.getElementById('previewPhone').textContent = phone;
+
+        const roleElementDisplay = document.getElementById('previewRole');
+        const accessElement = document.getElementById('previewAccess');
+        const adminWarning = document.getElementById('adminWarning');
+
+        if (role === 'Admin') {
+            roleElementDisplay.innerHTML = '<i class="fas fa-crown"></i> Admin';
+            roleElementDisplay.className = 'preview-role admin-role-badge';
+            accessElement.textContent = 'Full System Access, User Management, Settings';
+            adminWarning.style.display = 'flex';
+        } else {
+            roleElementDisplay.innerHTML = '<i class="fas fa-user"></i> User';
+            roleElementDisplay.className = 'preview-role user-role-badge';
+            accessElement.textContent = 'Booking Management, Profile Settings';
+            adminWarning.style.display = 'none';
+        }
+    }
+
+    document.getElementById('Email')?.addEventListener('blur', function() {
+        const email = this.value;
+        const emailStatus = document.getElementById('emailStatus');
+        const spinner = document.querySelector('.fa-sync');
+        if (!email) return;
+        spinner.style.display = 'inline-block';
+        setTimeout(() => {
+            spinner.style.display = 'none';
+            emailStatus.textContent = 'Email available';
+            emailStatus.style.color = '#10b981';
+        }, 500);
+    });
+
+    document.getElementById('password')?.addEventListener('input', function(e) {
+        const password = e.target.value;
+        const strengthBar = document.querySelector('.strength-bar');
+        const strengthText = document.querySelector('.strength-text');
+        let strength = 0, color = '#ef4444', text = 'Weak';
+        if (password.length >= 8) { document.getElementById('lengthReq').className = 'requirement met'; strength += 25; } else document.getElementById('lengthReq').className = 'requirement';
+        if (/[A-Z]/.test(password)) { document.getElementById('uppercaseReq').className = 'requirement met'; strength += 25; } else document.getElementById('uppercaseReq').className = 'requirement';
+        if (/[0-9]/.test(password)) { document.getElementById('numberReq').className = 'requirement met'; strength += 25; } else document.getElementById('numberReq').className = 'requirement';
+        if (/[^A-Za-z0-9]/.test(password)) { document.getElementById('specialReq').className = 'requirement met'; strength += 25; } else document.getElementById('specialReq').className = 'requirement';
+
+        if (strength >= 75) { color = '#10b981'; text = 'Strong'; } else if (strength >= 50) { color = '#f59e0b'; text = 'Medium'; }
+        strengthBar.style.width = strength + '%'; strengthBar.style.background = color;
+        strengthText.textContent = text; strengthText.style.color = color;
+    });
+
+    document.getElementById('confirmPassword')?.addEventListener('input', function() {
+        const password = document.getElementById('password')?.value;
+        const confirmPassword = this.value;
+        const errorElement = document.getElementById('passwordMatchError');
+        errorElement.style.display = (password && confirmPassword && password !== confirmPassword) ? 'block' : 'none';
+    });
+
+    document.querySelectorAll('input[name="UserRole"]')?.forEach(radio => {
+        radio.addEventListener('change', updatePreview);
+    });
+
+    document.getElementById('createUserForm')?.addEventListener('submit', function(e) {
+        const submitBtn = document.getElementById('submitBtn');
+        const password = document.getElementById('password')?.value;
+        const confirmPassword = document.getElementById('confirmPassword')?.value;
+        const userRole = document.querySelector('input[name="UserRole"]:checked');
+
+        if (password !== confirmPassword) { e.preventDefault(); alert('❌ Passwords do not match.'); return; }
+        if (password.length < 8) { e.preventDefault(); alert('❌ Password must be at least 8 characters.'); return; }
+        if (!userRole) { e.preventDefault(); alert('❌ Select a user role.'); return; }
+        if (userRole.value === 'Admin' && !confirm('⚠️ Create Admin? This user will have FULL ACCESS.')) { e.preventDefault(); return; }
+
+        submitBtn.classList.add('loading');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating User...';
+        submitBtn.disabled = true;
+    });
+
+    function clearForm() {
+        if (confirm('Clear all fields?')) {
+            document.getElementById('createUserForm').reset();
+            updatePreview();
+            document.querySelector('.strength-bar').style.width = '0%';
+            document.getElementById('emailStatus').textContent = '';
+            document.querySelectorAll('.requirement').forEach(req => req.className = 'requirement');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updatePreview();
+        document.getElementById('FullName')?.addEventListener('input', updatePreview);
+        document.getElementById('Email')?.addEventListener('input', updatePreview);
+        document.getElementById('PhoneNumber')?.addEventListener('input', updatePreview);
+    });
+</script>

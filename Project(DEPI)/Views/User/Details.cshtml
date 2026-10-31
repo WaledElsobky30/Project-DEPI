@@ -1,0 +1,606 @@
+﻿@using BookifyHotel.Model
+@model UserProfile
+@{
+    ViewData["Title"] = "UserProfile Details";
+    Layout = "~/Views/Shared/_SideBarLayout.cshtml";
+}
+
+<body data-active-page="users">
+    <div class="header">
+        <h2>User Details</h2>
+        <div class="user-info">
+            <div>
+                <h4>System Administrator</h4>
+                <p style="color: #b8860b;">Admin</p>
+            </div>
+            <img src="https://ui-avatars.com/api/?name=Admin&background=b8860b&color=fff" alt="User">
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <a href="@Url.Action("Index", "User")" class="back-btn">
+        <i class="fas fa-arrow-left"></i>
+        Back to Users
+    </a>
+
+    @if (Model != null)
+    {
+        <div class="details-container">
+            <!-- User Summary -->
+            <div class="summary-section">
+                <div class="summary-header">
+                    <div class="user-title">
+                        <h1>@Model.FullName</h1>
+                        <div class="user-id">User ID: USR@(Model.Id.ToString("D4"))</div>
+                    </div>
+                    <div class="user-avatar-large">
+                        <img src="https://ui-avatars.com/api/?name=@Model.FullName&background=b8860b&color=fff&size=120"
+                             alt="@Model.FullName">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal Information -->
+            <div class="info-sections">
+                <div class="info-section">
+                    <h3><i class="fas fa-user-circle"></i> Personal Information</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Full Name</div>
+                            <div class="info-value">@Model.FullName </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">User ID</div>
+                            <div class="info-value">USR@(Model.Id.ToString("D4"))</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Email Address</div>
+                            <div class="info-value">@Model.Email</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Phone Number</div>
+                            <div class="info-value">@(string.IsNullOrEmpty(Model.PhoneNumber) ? "Not provided" : Model.PhoneNumber)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Statistics -->
+                <div class="info-section">
+                    <h3><i class="fas fa-chart-bar"></i> Account Statistics</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card-mini">
+                            <div class="stat-icon-mini bookings">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div class="stat-info-mini">
+                                <h3>@(Model.Bookings?.Count ?? 0)</h3>
+                                <p>Total Bookings</p>
+                            </div>
+                        </div>
+                        <div class="stat-card-mini">
+                            <div class="stat-icon-mini reservations">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <div class="stat-info-mini">
+                                <h3>@(Model.ReservationCarts?.Count ?? 0)</h3>
+                                <p>Items in Cart</p>
+                            </div>
+                        </div>
+                        <div class="stat-card-mini">
+                            <div class="stat-icon-mini active">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                            <div class="stat-info-mini">
+                                <h3>@(Model.Bookings?.Count(b => b.Status == "Confirmed" || b.Status == "Completed") ?? 0)</h3>
+                                <p>Active Bookings</p>
+                            </div>
+                        </div>
+                        <div class="stat-card-mini">
+                            <div class="stat-icon-mini status">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="stat-info-mini">
+                                <h3>@((Model.Bookings?.Count ?? 0) > 0 ? "Active" : "New")</h3>
+                                <p>Account Status</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Bookings -->
+            <div class="bookings-section">
+                <div class="section-header">
+                    <h3><i class="fas fa-history"></i> Recent Bookings</h3>
+                    <a href="@Url.Action("Index", "Booking")" class="view-all">View All Bookings</a>
+                </div>
+
+                @if (Model.Bookings != null && Model.Bookings.Any())
+                {
+                    <div class="bookings-list">
+                        @foreach (var booking in Model.Bookings.Take(5))
+                        {
+                            <div class="booking-item">
+                                <div class="booking-header">
+                                    <div class="booking-id">Booking #BK@(booking.BookingId.ToString("D4"))</div>
+                                    <div class="booking-status @booking.Status.ToLower()">@booking.Status</div>
+                                </div>
+                                <div class="booking-details">
+                                    <div class="booking-room">
+                                        <i class="fas fa-door-open"></i>
+                                        Room @booking.Room?.RoomNumber
+                                    </div>
+                                    <div class="booking-dates">
+                                        <i class="fas fa-calendar"></i>
+                                        @booking.CheckInDate.ToString("MMM dd, yyyy") - @booking.CheckOutDate.ToString("MMM dd, yyyy")
+                                    </div>
+                                    <div class="booking-price">
+                                        <i class="fas fa-dollar-sign"></i>
+                                        $@booking.TotalPrice.ToString("N2")
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="no-bookings">
+                        <i class="fas fa-calendar-times"></i>
+                        <h4>No Bookings Yet</h4>
+                        <p>This user hasn't made any bookings yet.</p>
+                    </div>
+                }
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="@Url.Action("Edit", "User", new { id = Model.Id })" class="action-btn edit-btn">
+                    <i class="fas fa-edit"></i>
+                    Edit User
+                </a>
+                <button class="action-btn delete-btn" onclick="confirmDelete(@Model.Id, '@Model.FullName ')">
+                    <i class="fas fa-trash"></i>
+                    Delete User
+                </button>
+                <a href="@Url.Action("Index", "User")" class="action-btn back-btn-main">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Users
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i class="fas fa-user-slash"></i>
+            <h3>User Not Found</h3>
+            <p>The requested user could not be found.</p>
+            <a href="@Url.Action("Index", "User")" class="action-btn edit-btn" style="margin-top: 20px; display: inline-block;">
+                <i class="fas fa-arrow-left"></i>
+                Back to Users
+            </a>
+        </div>
+    }
+
+    <style>
+        /* Back Button */
+        .back-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            text-decoration: none;
+            width: fit-content;
+        }
+
+            .back-btn:hover {
+                background: rgba(184, 134, 11, 0.1);
+                border-color: var(--secondary);
+            }
+
+        /* Details Container */
+        .details-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        /* Summary Section */
+        .summary-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-title h1 {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: white;
+        }
+
+        .user-id {
+            color: var(--secondary);
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .user-avatar-large img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--secondary);
+        }
+
+        /* Info Sections */
+        .info-sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+        }
+
+        .info-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+            .info-section h3 {
+                color: white;
+                font-size: 18px;
+                font-weight: 600;
+                margin-bottom: 20px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+                .info-section h3 i {
+                    color: var(--secondary);
+                }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .info-label {
+            color: #ccc;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .stat-card-mini {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-icon-mini {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+        }
+
+        .bookings {
+            background: linear-gradient(135deg, #3b82f6, #60a5fa);
+        }
+
+        .reservations {
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+        }
+
+        .active {
+            background: linear-gradient(135deg, #10b981, #34d399);
+        }
+
+        .status {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+        }
+
+        .stat-info-mini h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 2px;
+            color: white;
+            margin: 0;
+        }
+
+        .stat-info-mini p {
+            color: #ccc;
+            font-size: 11px;
+            margin: 0;
+        }
+
+        /* Bookings Section */
+        .bookings-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+            .section-header h3 {
+                color: white;
+                font-size: 18px;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+                .section-header h3 i {
+                    color: var(--secondary);
+                }
+
+        .view-all {
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: rgba(184, 134, 11, 0.1);
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+            .view-all:hover {
+                background: rgba(184, 134, 11, 0.2);
+            }
+
+        .bookings-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .booking-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .booking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .booking-id {
+            font-weight: 600;
+            color: white;
+        }
+
+        .booking-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .confirmed {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .cancelled {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .booking-details {
+            display: flex;
+            gap: 20px;
+            font-size: 12px;
+            color: #ccc;
+        }
+
+            .booking-details i {
+                color: var(--secondary);
+                margin-right: 5px;
+            }
+
+        .no-bookings {
+            text-align: center;
+            padding: 40px 20px;
+            color: #ccc;
+        }
+
+            .no-bookings i {
+                font-size: 48px;
+                color: var(--secondary);
+                margin-bottom: 15px;
+                opacity: 0.5;
+            }
+
+            .no-bookings h4 {
+                font-size: 18px;
+                margin-bottom: 10px;
+                color: white;
+            }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .edit-btn {
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            color: white;
+        }
+
+            .edit-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(184, 134, 11, 0.4);
+            }
+
+        .delete-btn {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+            .delete-btn:hover {
+                background: rgba(239, 68, 68, 0.3);
+            }
+
+        .back-btn-main {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+            .back-btn-main:hover {
+                background: rgba(255, 255, 255, 0.1);
+            }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #ccc;
+        }
+
+            .empty-state i {
+                font-size: 64px;
+                color: var(--secondary);
+                margin-bottom: 20px;
+                opacity: 0.5;
+            }
+
+            .empty-state h3 {
+                font-size: 24px;
+                margin-bottom: 10px;
+                color: white;
+            }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .summary-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .info-sections {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .booking-details {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .section-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+        }
+    </style>
+
+    <script>
+        // Confirm delete function
+        function confirmDelete(userId, userName) {
+            if (confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
+                window.location.href = '@Url.Action("Delete", "UserProfile")' + '?id=' + userId;
+            }
+        }
+    </script>
+</body>

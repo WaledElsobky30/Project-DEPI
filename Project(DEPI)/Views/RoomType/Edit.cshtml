@@ -1,0 +1,297 @@
+﻿@model BookifyHotel.Model.RoomType
+@{
+    ViewData["Title"] = "Edit Room Type";
+    Layout = "~/Views/Shared/_SideBarLayout.cshtml";
+}
+
+<div class="edit-roomtype-page" data-active-page="roomtypes">
+
+    <div class="header">
+        <h2>Edit Room Type</h2>
+        <div class="user-info">
+            <div>
+                <h4>System Administrator</h4>
+                <p style="color: #b8860b;">Admin Panel</p>
+            </div>
+            <img src="https://ui-avatars.com/api/?name=Admin&background=b8860b&color=fff" alt="User">
+        </div>
+    </div>
+
+    <a href="@Url.Action("Index", "RoomType")" class="back-btn">
+        <i class="fas fa-arrow-left"></i>
+        Back to Room Types
+    </a>
+
+    <div class="form-container">
+        <div class="form-header">
+            <h3>Edit Room Type</h3>
+            <p>Update the room type information below</p>
+        </div>
+
+        <form asp-action="EditSave" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="RoomTypeId" />
+
+            <div class="form-group">
+                <label class="form-label" asp-for="Name">Room Type Name *</label>
+                <input type="text" class="form-control" asp-for="Name" placeholder="e.g., Deluxe Suite, Standard Room">
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" asp-for="PricePerNight">Price Per Night ($) *</label>
+                <input type="number" step="0.01" class="form-control" asp-for="PricePerNight" placeholder="0.00">
+                <span asp-validation-for="PricePerNight" class="text-danger"></span>
+            </div>
+
+            <div class="current-info">
+                <h4>Current Information</h4>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Room Type ID</div>
+                        <div class="info-value">#@Model.RoomTypeId</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Total Rooms Assigned</div>
+                        <div class="info-value">@(Model.Rooms?.Count ?? 0) Rooms</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Update Room Type
+                </button>
+
+                <a href="@Url.Action("Index", "RoomType")" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+  
+    .back-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+        text-decoration: none;
+        width: fit-content;
+    }
+
+        .back-btn:hover {
+            background: rgba(184, 134, 11, 0.1);
+            border-color: #b8860b;
+        }
+
+    .form-container {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 30px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+        .form-header h3 {
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .form-header p {
+            color: #ccc;
+            font-size: 16px;
+        }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        color: white;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        color: white;
+        font-size: 14px;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s;
+        font-family: inherit;
+    }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #b8860b;
+            box-shadow: 0 0 0 2px rgba(184, 134, 11, 0.2);
+        }
+
+        .form-control::placeholder {
+            color: #666;
+        }
+
+    .current-info {
+        background: rgba(184, 134, 11, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 25px;
+        border: 1px solid rgba(184, 134, 11, 0.2);
+    }
+
+        .current-info h4 {
+            color: #b8860b;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .info-label {
+        color: #ccc;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .info-value {
+        color: white;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .text-danger {
+        color: #ef4444;
+        font-size: 12px;
+        margin-top: 5px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-decoration: none;
+        flex: 1;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #b8860b, #d4af37);
+        color: white;
+    }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(184, 134, 11, 0.4);
+        }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+    input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
+
+    @@media (max-width: 768px) {
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .form-container {
+            padding: 20px;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Form enhancements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Price formatting
+            const priceInput = document.querySelector('input[name="PricePerNight"]');
+            if (priceInput) {
+                // Format on load if value exists
+                if (priceInput.value) {
+                    priceInput.value = parseFloat(priceInput.value).toFixed(2);
+                }
+
+                priceInput.addEventListener('blur', function() {
+                    if (this.value) {
+                        this.value = parseFloat(this.value).toFixed(2);
+                    }
+                });
+            }
+        });
+    </script>
+}

@@ -1,0 +1,277 @@
+﻿@model BookifyHotel.Model.Room
+
+@{
+    ViewData["Title"] = "Room Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+   
+    .details-page {
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+        min-height: 100vh;
+        padding: 120px 20px 60px;
+        color: white;
+    }
+
+   
+    .glass-container {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    
+    .details-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 30px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding-bottom: 20px;
+    }
+
+    .room-title h1 {
+        font-size: 2.5rem;
+        font-weight: 300;
+        margin: 0;
+        background: linear-gradient(45deg, #b8860b, #ffd700);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .room-subtitle {
+        color: #ccc;
+        font-size: 1.1rem;
+        margin-top: 5px;
+    }
+
+    .room-price-badge {
+        text-align: right;
+    }
+
+    .price-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #b8860b;
+    }
+
+    .price-unit {
+        font-size: 1rem;
+        color: #999;
+    }
+
+    
+    .details-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 40px;
+    }
+
+    
+    .main-image {
+        width: 100%;
+        height: 450px;
+        object-fit: cover;
+        border-radius: 15px;
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+   
+    .info-card {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 20px;
+    }
+
+    .info-title {
+        color: #b8860b;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-left: 3px solid #b8860b;
+        padding-left: 10px;
+    }
+
+    .features-list {
+        list-style: none;
+        padding: 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+        .features-list li {
+            color: #ddd;
+            display: flex;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+
+        .features-list i {
+            color: #b8860b;
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+    .description-text {
+        color: #ccc;
+        line-height: 1.7;
+        font-size: 1rem;
+    }
+
+   
+    .actions-bar {
+        margin-top: 40px;
+        display: flex;
+        gap: 20px;
+    }
+
+    .btn-book {
+        flex: 2;
+        background: linear-gradient(135deg, #b8860b, #d4af37);
+        color: white;
+        text-align: center;
+        padding: 15px;
+        border-radius: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        text-decoration: none;
+        transition: all 0.3s;
+        border: none;
+        box-shadow: 0 5px 15px rgba(184, 134, 11, 0.3);
+    }
+
+        .btn-book:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(184, 134, 11, 0.5);
+            color: white;
+        }
+
+    .btn-back {
+        flex: 1;
+        background: transparent;
+        border: 2px solid #b8860b;
+        color: #b8860b;
+        text-align: center;
+        padding: 15px;
+        border-radius: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+
+        .btn-back:hover {
+            background: rgba(184, 134, 11, 0.1);
+            color: white;
+            border-color: white;
+        }
+
+    
+    @@media (max-width: 992px) {
+        .details-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .main-image {
+            height: 350px;
+        }
+    }
+</style>
+
+<section class="details-page">
+    <div class="glass-container">
+
+        <div class="details-header">
+            <div class="room-title">
+                <h1>@Model.RoomTypes.Name</h1>
+                <div class="room-subtitle">Room Number: @Model.RoomNumber | Floor: @Model.Floor</div>
+            </div>
+            <div class="room-price-badge">
+                <div class="price-value">$@Model.RoomTypes.PricePerNight.ToString("N0")</div>
+                <div class="price-unit">per night</div>
+            </div>
+        </div>
+
+        <div class="details-grid">
+            <div class="image-wrapper">
+                <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "https://images.unsplash.com/photo-1611892440504-42a792e24d32" : Model.ImageUrl)"
+                     class="main-image" alt="Room Image">
+            </div>
+
+            <div class="info-wrapper">
+
+                <div class="info-card">
+                    <div class="info-title">Description</div>
+                    <p class="description-text">
+                        Experience ultimate luxury in our @Model.RoomTypes.Name. Designed with elegance and comfort in mind,
+                        this room offers stunning views and premium amenities to ensure your stay is unforgettable.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-title">Room Amenities</div>
+                    <ul class="features-list">
+                        <li><i class="fas fa-wifi"></i> High-Speed WiFi</li>
+                        <li><i class="fas fa-tv"></i> Smart TV</li>
+                        <li><i class="fas fa-snowflake"></i> Air Conditioning</li>
+                        <li><i class="fas fa-coffee"></i> Coffee Maker</li>
+                        <li><i class="fas fa-concierge-bell"></i> 24/7 Service</li>
+                        <li><i class="fas fa-hot-tub"></i> Private Bath</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-title">Current Status</div>
+                    @if (Model.IsAvailable)
+                    {
+                        <span style="color: #10b981; font-weight: bold; font-size: 1.1rem;">
+                            <i class="fas fa-check-circle"></i> Available Now
+                        </span>
+                    }
+                    else
+                    {
+                        <span style="color: #ef4444; font-weight: bold; font-size: 1.1rem;">
+                            <i class="fas fa-times-circle"></i> Currently Booked
+                        </span>
+                    }
+                </div>
+
+            </div>
+        </div>
+
+        <div class="actions-bar">
+            <a href="@Url.Action("Index", "Room")" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Back to Rooms
+            </a>
+
+            @if (Model.IsAvailable)
+            {
+                <a asp-controller="Booking" asp-action="Checkout" asp-route-roomId="@Model.RoomId" class="btn-book">
+                    Book This Room Now <i class="fas fa-check"></i>
+                </a>
+            }
+            else
+            {
+                <button class="btn-book" style="background: #555; cursor: not-allowed; box-shadow: none;" disabled>
+                    Not Available <i class="fas fa-lock"></i>
+                </button>
+            }
+        </div>
+
+    </div>
+</section>

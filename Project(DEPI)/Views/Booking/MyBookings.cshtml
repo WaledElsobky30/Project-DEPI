@@ -1,0 +1,351 @@
+﻿@model IEnumerable<BookifyHotel.Model.Booking>
+
+@{
+    ViewData["Title"] = "My Bookings";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+
+    .my-bookings-section {
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+        min-height: 100vh;
+        padding: 120px 20px 60px;
+        color: white;
+    }
+
+    
+    .page-header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 300;
+        margin-bottom: 10px;
+        background: linear-gradient(45deg, #b8860b, #ffd700);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+    }
+
+ 
+    .booking-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 25px;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 20px;
+    }
+
+        .booking-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border-color: rgba(184, 134, 11, 0.3);
+        }
+
+  
+    .booking-img {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    
+    .booking-info {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .room-number {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: white;
+        margin-bottom: 5px;
+    }
+
+    .room-type {
+        color: #b8860b;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+
+    .booking-dates {
+        font-size: 0.9rem;
+        color: #ccc;
+        display: flex;
+        gap: 15px;
+    }
+
+        .booking-dates i {
+            color: #b8860b;
+            margin-right: 5px;
+        }
+
+    
+    .booking-meta {
+        text-align: right;
+        min-width: 150px;
+    }
+
+    .total-price {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #b8860b;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    
+    .status-badge {
+        padding: 6px 15px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: inline-block;
+    }
+
+    .status-confirmed {
+        background: rgba(16, 185, 129, 0.15);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-pending {
+        background: rgba(245, 158, 11, 0.15);
+        color: #f59e0b;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .status-cancelled {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .status-completed {
+        background: rgba(59, 130, 246, 0.15);
+        color: #3b82f6;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    
+    .action-btn {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+    }
+
+        .action-btn:hover {
+            border-color: #b8860b;
+            background: rgba(184, 134, 11, 0.1);
+            color: #b8860b;
+        }
+
+  
+    .pay-btn {
+        background: linear-gradient(135deg, #10b981, #059669) !important; 
+        border: none !important;
+        font-weight: 700 !important;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        color: white !important;
+    }
+
+        .pay-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+            color: white !important;
+        }
+
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 0;
+        opacity: 0.7;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        color: #b8860b;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .btn-gold {
+        background: linear-gradient(135deg, #b8860b, #d4af37);
+        color: white;
+        padding: 12px 30px;
+        border-radius: 10px;
+        border: none;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 20px;
+        box-shadow: 0 5px 15px rgba(184, 134, 11, 0.3);
+        transition: all 0.3s;
+    }
+
+        .btn-gold:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(184, 134, 11, 0.5);
+            color: white;
+        }
+
+    @@media (max-width: 768px) {
+        .booking-card {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .booking-img {
+            width: 100%;
+            height: 180px;
+        }
+
+        .booking-meta {
+            width: 100%;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .booking-actions {
+            width: 100%;
+            justify-content: flex-start;
+            margin-top: 15px;
+        }
+    }
+</style>
+
+<section class="my-bookings-section">
+    <div class="container">
+
+        <div class="page-header">
+            <h2 class="page-title">My Bookings History</h2>
+            <p class="text-muted">Manage and track all your luxury stays.</p>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success text-center mb-4" style="background: rgba(16, 185, 129, 0.2); border-color: #10b981; color: #d1fae5;">
+                <i class="fas fa-check-circle me-2"></i> @TempData["Success"]
+            </div>
+        }
+
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <i class="fas fa-suitcase-rolling empty-icon"></i>
+                <h3>You haven't booked any rooms yet!</h3>
+                <p>Start your journey with us today and experience luxury like never before.</p>
+                <a asp-controller="Home" asp-action="Index" class="btn-gold">
+                    Book Your First Stay
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="bookings-list">
+                @foreach (var item in Model)
+                {
+                    <div class="booking-card">
+
+                        <img src="@(string.IsNullOrEmpty(item.Room.ImageUrl) ? "https://images.unsplash.com/photo-1611892440504-42a792e24d32" : item.Room.ImageUrl)"
+                             alt="Room" class="booking-img">
+
+                        <div class="booking-info">
+                            <div class="room-number">Room @item.Room.RoomNumber</div>
+                            <div class="room-type">@item.Room.RoomTypes.Name</div>
+
+                            <div class="booking-dates">
+                                <span><i class="fas fa-check-circle"></i> In: @item.CheckInDate.ToString("MMM dd, yyyy")</span>
+                                <span><i class="fas fa-sign-out-alt"></i> Out: @item.CheckOutDate.ToString("MMM dd, yyyy")</span>
+                            </div>
+
+                            <div class="mt-2 text-muted small">
+                                <i class="far fa-clock"></i> Booked on: @item.BookingDate.ToString("dd/MM/yyyy")
+                            </div>
+                        </div>
+
+                        <div class="booking-meta">
+                            <span class="total-price">$@item.TotalPrice.ToString("N2")</span>
+
+                            @if (item.Status == "Confirmed")
+                            {
+                                <span class="status-badge status-confirmed">Confirmed</span>
+                            }
+                            else if (item.Status == "Pending")
+                            {
+                                <span class="status-badge status-pending">Pending Payment</span>
+                            }
+                            else if (item.Status == "Cancelled")
+                            {
+                                <span class="status-badge status-cancelled">Cancelled</span>
+                            }
+                            else if (item.Status == "Completed")
+                            {
+                                <span class="status-badge status-completed">Completed</span>
+                            }
+                            else
+                            {
+                                <span class="status-badge status-pending">@item.Status</span>
+                            }
+                        </div>
+
+                        <div class="booking-actions ms-auto d-flex gap-2 align-items-center">
+
+                            @if (item.Status == "Pending")
+                            {
+                                <form asp-action="PayNow" asp-controller="Booking" method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="bookingId" value="@item.BookingId" />
+                                    <button type="submit" class="action-btn pay-btn">
+                                        <i class="fas fa-credit-card"></i> Pay Now
+                                    </button>
+                                </form>
+                            }
+
+                            <a asp-action="Details" asp-route-id="@item.BookingId" class="action-btn">
+                                <i class="fas fa-info-circle"></i> Details
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="text-center mt-5">
+                <a asp-controller="Home" asp-action="Index" class="action-btn">
+                    <i class="fas fa-plus"></i> Book Another Room
+                </a>
+            </div>
+        }
+    </div>
+</section>
